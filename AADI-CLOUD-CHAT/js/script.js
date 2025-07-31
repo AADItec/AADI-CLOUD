@@ -1,0 +1,1624 @@
+// ===== PRUDENCE AI v2 - ADAPTED SCRIPT =====
+// Adapted from original script to work with Prudence AI v2 UI
+
+import { auth, database } from './core/firebase.js';
+import { loginUser, signUpUser, logoutUser, checkAuthState } from './core/auth.js';
+import { loadFaqsFromFirebase, getFaqAnswer } from './modules/faq.js';
+import { aiModels } from './modules/aiModels.js';
+import { initializeThemeToggle } from './modules/theme.js';
+import { cerebrasAPI } from './modules/cerebras.js';
+import { geminiAPI } from './modules/gemini.js';
+import { FusionService } from './modules/fusion.js';
+
+import { ref, set, get, push, remove } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+// Configure marked.js to use highlight.js for code blocks
+if (typeof marked !== 'undefined') {
+    marked.setOptions({
+        highlight: function(code, lang) {
+            if (window.hljs) {
+                if (lang && window.hljs.getLanguage(lang)) {
+                    return window.hljs.highlight(code, { language: lang }).value;
+                } else {
+                    return window.hljs.highlightAuto(code).value;
+                }
+            }
+            return code;
+        }
+    });
+}
+
+// Test functions (keeping your existing test functions)
+window.testGeminiAPI = async function() {
+    console.log('🧪 Testing Gemini API connection...');
+    try {
+        const result = await geminiAPI.testConnection();
+        if (result.success) {
+            console.log('✅ Gemini API test successful!');
+            alert('Gemini API test successful! Check console for details.');
+        } else {
+            console.error('❌ Gemini API test failed:', result.error);
+            alert('Gemini API test failed: ' + result.error);
+        }
+    } catch (error) {
+        console.error('❌ Test error:', error);
+        alert('Test error: ' + error.message);
+    }
+};
+
+window.testFusion = async function() {
+    console.log('🧪 Testing fusion functionality...');
+    const testResponses = [
+        "AI works through neural networks and machine learning algorithms.",
+        "Artificial intelligence processes data to make intelligent decisions.",
+        "Machine learning enables computers to learn from experience."
+    ];
+    
+    try {
+        const fusionPrompt = `Here are responses from 3 different AI models about: "What is AI?"
+
+Model 1 (Test Model 1): ${testResponses[0]}
+Model 2 (Test Model 2): ${testResponses[1]}
+Model 3 (Test Model 3): ${testResponses[2]}
+
+Please synthesize these responses into one comprehensive, coherent answer.`;
+
+        const result = await geminiAPI.generateResponse(fusionPrompt, {
+            model: 'gemini-2.5-flash',
+            temperature: 0.7,
+            maxTokens: 500
+        });
+        
+        console.log('✅ Test fusion successful!');
+        alert('Test fusion successful! Check console for details.');
+        
+    } catch (error) {
+        console.error('❌ Test fusion failed:', error);
+        alert('Test fusion failed: ' + error.message);
+    }
+};
+
+window.testSimpleGemini = async function() {
+    console.log('🧪 Testing simple Gemini API call...');
+    try {
+        const result = await geminiAPI.generateResponse("Hello! Please respond with a simple greeting.", {
+            model: 'gemini-2.5-flash',
+            temperature: 0.7,
+            maxTokens: 100
+        });
+        
+        console.log('✅ Simple Gemini test successful!');
+        alert('Simple Gemini test successful! Check console for details.');
+        
+    } catch (error) {
+        console.error('❌ Simple Gemini test failed:', error);
+        alert('Simple Gemini test failed: ' + error.message);
+    }
+};
+
+window.checkGeminiModels = async function() {
+    console.log('🔍 Checking available Gemini models...');
+    try {
+        const models = await geminiAPI.getAvailableModels();
+        console.log('✅ Available Gemini models:', models);
+        console.log('🎯 Our configured models:', geminiAPI.listModels());
+        console.log('⚙️ Default model:', geminiAPI.defaultModel);
+        alert('Gemini models check complete! Check console for details.');
+    } catch (error) {
+        console.error('❌ Gemini models check failed:', error);
+        alert('Gemini models check failed: ' + error.message);
+    }
+};
+
+// Firebase initialization check
+const checkFirebaseInit = () => {
+    try {
+        return auth && database;
+    } catch (error) {
+        console.error('Error checking Firebase initialization:', error);
+        return false;
+    }
+};
+
+// Prudence AI v2 Chat Interface Class
+class PrudenceAIV2 {
+    constructor() {
+        // Core properties
+        this.compareMode = true;
+        this.selectedBots = ['llama4-maverick-17b-128e-instruct', 'gemini-2.0-flash', 'qwen-3-32b'];
+        this.currentChatId = null;
+        this.chatHistory = [];
+        this.messages = [];
+        this.faqs = [];
+        this.personalityFaqs = [];
+        this.modelTemperatures = {};
+        this.aiModels = aiModels;
+        this.fusionService = new FusionService(geminiAPI);
+        this.auth = auth;
+        this.database = database;
+        this.firebaseConfigured = checkFirebaseInit();
+        
+        // Configuration
+        this.appName = 'Prudence AI v2';
+        this.maxChatHistory = 20;
+        this.maxMessageLength = 1000;
+        this.maxAiModels = 3;
+
+        // Initialize UI elements
+        this.initializeElements();
+        this.initializeEventListeners();
+        this.initializeUI();
+        this.renderChatHistory();
+        this.startNewChat();
+        this.updateBotSelection();
+        this.hideChatArea();
+        this.checkAuthState();
+        this.loadFaqsFromFirebase();
+    }
+
+    // Initialize DOM elements for Prudence AI v2
+    initializeElements() {
+        // Core elements
+        this.chatMessages = document.getElementById('chatMessages');
+        this.messageInput = document.getElementById('messageInput');
+        this.sendButton = document.getElementById('sendButton');
+        this.newChatButton = document.getElementById('newChatButton');
+        this.chatHistoryList = document.getElementById('chatHistoryList');
+        
+        // Sidebar elements
+        this.sidebar = document.getElementById('sidebar');
+        this.sidebarToggle = document.getElementById('sidebarToggle');
+        this.clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        
+        // Model selector elements
+        this.modelDropdownToggle = document.getElementById('modelDropdownToggle');
+        this.modelDropdownContent = document.getElementById('modelDropdownContent');
+        this.selectedModelsList = document.getElementById('selectedModelsList');
+        
+        // Header elements
+        this.themeToggle = document.getElementById('themeToggle');
+        this.compareToggle = document.getElementById('compareToggle');
+        this.expandRightSidebarBtn = document.getElementById('expandRightSidebarBtn');
+        
+        // Right sidebar elements
+        this.rightSidebar = document.getElementById('rightSidebar');
+        this.closeRightSidebarBtn = document.getElementById('closeRightSidebarBtn');
+        this.individualResponses = document.getElementById('individualResponses');
+        
+        // Auth elements
+        this.logoutBtn = document.getElementById('logoutBtn');
+        this.settingsBtn = document.getElementById('settingsBtn');
+        this.authModal = document.getElementById('authModal');
+        this.modalTitle = document.getElementById('modalTitle');
+        this.modalEmail = document.getElementById('modalEmail');
+        this.modalPassword = document.getElementById('modalPassword');
+        this.modalSubmit = document.getElementById('modalSubmit');
+        this.modalClose = document.getElementById('modalClose');
+        this.toggleModalAuth = document.getElementById('toggleModalAuth');
+        
+        // Input elements
+        this.attachmentBtn = document.getElementById('attachmentBtn');
+        this.optimizeBtn = document.getElementById('optimizeBtn');
+        
+        // Modal elements
+        this.comparePopoutModal = document.getElementById('comparePopoutModal');
+        this.closeComparePopout = document.getElementById('closeComparePopout');
+        this.comparePopoutContentArea = document.getElementById('comparePopoutContentArea');
+    }
+
+    // Initialize UI components
+    initializeUI() {
+        this.populateModelDropdown();
+        this.initializeRightSidebar();
+        this.initializeExpandRightSidebar();
+    }
+
+    // Populate model dropdown with AI models
+    populateModelDropdown() {
+        if (!this.modelDropdownContent) return;
+        
+        this.modelDropdownContent.innerHTML = '';
+        
+        Object.keys(this.aiModels).forEach(botId => {
+            const model = this.aiModels[botId];
+            const modelOption = document.createElement('div');
+            modelOption.className = 'model-option';
+            modelOption.dataset.modelId = botId;
+            
+            modelOption.innerHTML = `
+                <div class="model-option-icon">
+                    ${this.renderModelIcon(model.icon)}
+                </div>
+                <div class="model-option-info">
+                    <div class="model-option-name">${model.name}</div>
+                    <div class="model-option-desc">${model.description}</div>
+                </div>
+                <div class="model-option-checkbox">
+                    <i class="fas fa-check"></i>
+                </div>
+            `;
+            
+            modelOption.addEventListener('click', () => this.toggleModelSelection(botId));
+            this.modelDropdownContent.appendChild(modelOption);
+        });
+        
+        this.updateSelectedModelsDisplay();
+    }
+
+    // Initialize event listeners for Prudence AI v2
+    initializeEventListeners() {
+        // Core chat events
+        if (this.sendButton) {
+            this.sendButton.addEventListener('click', () => this.sendMessage());
+        }
+        if (this.messageInput) {
+            this.messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.sendMessage();
+            });
+            
+            // Add input event listener to manage send button state
+            this.messageInput.addEventListener('input', () => {
+                this.updateSendButtonState();
+            });
+        }
+        if (this.newChatButton) {
+            this.newChatButton.addEventListener('click', () => this.startNewChat());
+        }
+
+        // Sidebar events
+        if (this.sidebarToggle) {
+            this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+        }
+        if (this.clearHistoryBtn) {
+            this.clearHistoryBtn.addEventListener('click', () => this.clearChatHistory());
+        }
+
+        // Model selector events
+        if (this.modelDropdownToggle) {
+            this.modelDropdownToggle.addEventListener('click', () => this.toggleModelDropdown());
+        }
+
+        // Header events
+        if (this.themeToggle) {
+            this.themeToggle.addEventListener('click', () => this.toggleTheme());
+        }
+        if (this.compareToggle) {
+            this.compareToggle.addEventListener('click', () => this.toggleCompareMode());
+        }
+        if (this.expandRightSidebarBtn) {
+            this.expandRightSidebarBtn.addEventListener('click', () => this.openRightSidebar());
+        }
+
+        // Right sidebar events
+        if (this.closeRightSidebarBtn) {
+            this.closeRightSidebarBtn.addEventListener('click', () => this.closeRightSidebar());
+        }
+
+        // Auth events
+        if (this.logoutBtn) {
+            this.logoutBtn.addEventListener('click', () => this.logoutUser());
+        }
+        if (this.settingsBtn) {
+            this.settingsBtn.addEventListener('click', () => this.openSettings());
+        }
+
+        // Input events
+        if (this.attachmentBtn) {
+            this.attachmentBtn.addEventListener('click', () => this.attachFiles());
+        }
+        if (this.optimizeBtn) {
+            this.optimizeBtn.addEventListener('click', () => this.optimizePrompt());
+        }
+
+        // Modal events
+        if (this.modalSubmit) {
+            this.modalSubmit.addEventListener('click', () => this.handleAuthSubmit());
+        }
+        if (this.modalClose) {
+            this.modalClose.addEventListener('click', () => this.hideAuthModal());
+        }
+        if (this.toggleModalAuth) {
+            this.toggleModalAuth.addEventListener('click', () => this.toggleAuthMode());
+        }
+
+        // Popout modal events
+        if (this.closeComparePopout) {
+            this.closeComparePopout.addEventListener('click', () => this.closeComparePopoutModal());
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.modelDropdownToggle?.contains(e.target) && !this.modelDropdownContent?.contains(e.target)) {
+                this.closeModelDropdown();
+            }
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', (e) => {
+            if (this.authModal && !this.authModal.contains(e.target)) {
+                this.hideAuthModal();
+            }
+            if (this.comparePopoutModal && !this.comparePopoutModal.contains(e.target)) {
+                this.closeComparePopoutModal();
+            }
+        });
+    }
+
+    // ===== CORE FUNCTIONALITY METHODS =====
+
+    // Model Selection Methods
+    toggleModelDropdown() {
+        if (this.modelDropdownContent) {
+            this.modelDropdownContent.classList.toggle('active');
+            this.modelDropdownToggle?.classList.toggle('active');
+        }
+    }
+
+    closeModelDropdown() {
+        if (this.modelDropdownContent) {
+            this.modelDropdownContent.classList.remove('active');
+            this.modelDropdownToggle?.classList.remove('active');
+        }
+    }
+
+    toggleModelSelection(botId) {
+        const previousBots = [...this.selectedBots];
+        
+        if (this.selectedBots.includes(botId)) {
+            this.selectedBots = this.selectedBots.filter(id => id !== botId);
+        } else if (this.selectedBots.length < 3) {
+            this.selectedBots.push(botId);
+        }
+
+        const botsChanged = previousBots.sort().join(',') !== this.selectedBots.sort().join(',');
+        if (botsChanged && this.messages.length > 0) {
+            this.saveChatHistory();
+            this.startNewChat();
+        }
+
+        this.updateSelectedModelsDisplay();
+        this.updateModelDropdownSelection();
+    }
+
+    updateSelectedModelsDisplay() {
+        if (!this.selectedModelsList) return;
+        
+        this.selectedModelsList.innerHTML = '';
+        
+        if (this.selectedBots.length === 0) {
+            this.selectedModelsList.innerHTML = '<div class="no-models">No models selected</div>';
+            return;
+        }
+        
+        this.selectedBots.forEach(botId => {
+            const model = this.aiModels[botId];
+            if (!model) return;
+            
+            const tag = document.createElement('div');
+            tag.className = 'selected-model-tag';
+            tag.innerHTML = `
+                <span>${model.name}</span>
+                <button class="remove-btn" data-model-id="${botId}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            const removeBtn = tag.querySelector('.remove-btn');
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleModelSelection(botId);
+            });
+            
+            this.selectedModelsList.appendChild(tag);
+        });
+    }
+
+    updateModelDropdownSelection() {
+        if (!this.modelDropdownContent) return;
+        
+        const options = this.modelDropdownContent.querySelectorAll('.model-option');
+        options.forEach(option => {
+            const modelId = option.dataset.modelId;
+            const isSelected = this.selectedBots.includes(modelId);
+            option.classList.toggle('selected', isSelected);
+        });
+    }
+
+    // Sidebar Methods
+    toggleSidebar() {
+        if (this.sidebar) {
+            this.sidebar.classList.toggle('collapsed');
+        }
+    }
+
+    // Right Sidebar Methods
+    initializeRightSidebar() {
+        // Initialize resize functionality
+        const resizeHandle = this.rightSidebar?.querySelector('.resize-handle');
+        if (resizeHandle) {
+            let isResizing = false;
+            let startX, startWidth;
+            
+            resizeHandle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = this.rightSidebar.offsetWidth;
+                document.body.style.cursor = 'col-resize';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                
+                const width = startWidth - (e.clientX - startX);
+                if (width > 300 && width < 800) {
+                    this.rightSidebar.style.width = width + 'px';
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isResizing = false;
+                document.body.style.cursor = '';
+            });
+        }
+    }
+
+    initializeExpandRightSidebar() {
+        if (this.expandRightSidebarBtn && this.rightSidebar) {
+            // Show expand button only when right sidebar is closed
+            if (!this.rightSidebar.classList.contains('open')) {
+                this.expandRightSidebarBtn.classList.add('show');
+            }
+        }
+    }
+
+    openRightSidebar() {
+        if (this.rightSidebar) {
+            this.rightSidebar.classList.add('open');
+            this.expandRightSidebarBtn?.classList.remove('show');
+            
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.classList.add('with-right-sidebar');
+            }
+        }
+    }
+
+    closeRightSidebar() {
+        if (this.rightSidebar) {
+            this.rightSidebar.classList.remove('open');
+            this.expandRightSidebarBtn?.classList.add('show');
+            
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.classList.remove('with-right-sidebar');
+            }
+        }
+    }
+
+    // Theme Methods
+    toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        
+        if (this.themeToggle) {
+            const icon = this.themeToggle.querySelector('i');
+            if (icon) {
+                icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+        
+        localStorage.setItem('prudence-ai-theme', isDark ? 'dark' : 'light');
+    }
+
+    // Chat Methods
+    startNewChat() {
+        this.currentChatId = 'chat_' + Date.now();
+        this.messages = [];
+        
+        // Expand left sidebar when starting new chat (Prudence AI v2 behavior)
+        if (this.sidebar && this.sidebar.classList.contains('collapsed')) {
+            this.sidebar.classList.remove('collapsed');
+        }
+        
+        if (this.chatMessages) {
+            this.chatMessages.innerHTML = `
+                <div class="message ai-message" data-welcome="true">
+                    <div class="message-content">
+                        <strong>🤖 Prudence AI v2:</strong>
+                        <div>Welcome to Prudence AI v2</div>
+                        <div>Start a conversation with your AI assistant. Select different models or use ensemble mode to see responses from multiple AIs.</div>
+                    </div>
+                    <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                </div>
+            `;
+        }
+        
+        if (this.individualResponses) {
+            this.individualResponses.innerHTML = '';
+        }
+        
+        if (this.messageInput) {
+            this.messageInput.focus();
+        }
+        
+        this.compareMode = true;
+        if (this.compareToggle) {
+            this.compareToggle.classList.add('active');
+        }
+    }
+
+    sendMessage() {
+        const message = this.messageInput.value.trim();
+        const hasAttachments = this.attachments && this.attachments.length > 0;
+        
+        if (!message && !hasAttachments) return;
+
+        if (!this.selectedBots || this.selectedBots.length === 0) {
+            this.addMessage("Please select an AI model before sending a message.", 'ai');
+            this.messageInput.value = '';
+            this.clearAttachments();
+            return;
+        }
+
+        const welcomeMessage = this.chatMessages.querySelector('[data-welcome="true"]');
+        if (welcomeMessage) welcomeMessage.remove();
+
+        // Create message content with attachments
+        let messageContent = message;
+        if (hasAttachments) {
+            const attachmentInfo = this.attachments.map(file => 
+                `📎 ${file.name} (${this.formatFileSize(file.size)})`
+            ).join('\n');
+            messageContent = message ? `${message}\n\n${attachmentInfo}` : attachmentInfo;
+        }
+
+        this.messages.push({
+            content: messageContent,
+            sender: 'user',
+            timestamp: Date.now(),
+            attachments: this.attachments ? [...this.attachments] : []
+        });
+
+        this.messageInput.value = '';
+        this.clearAttachments();
+        this.sendButton.disabled = true;
+
+        this.handleCompareMode(messageContent);
+    }
+
+    // ===== AI RESPONSE HANDLING =====
+
+    async handleCompareMode(message) {
+        // Add user message to chat
+        this.addMessage(message, 'user');
+        
+        // Collapse left sidebar when conversation starts (Prudence AI v2 behavior)
+        if (this.sidebar && !this.sidebar.classList.contains('collapsed')) {
+            this.sidebar.classList.add('collapsed');
+        }
+        
+        // Open right sidebar to show individual responses
+        this.openRightSidebar();
+        
+        // Generate responses from all selected models
+        const botResponses = [];
+        const responsePromises = this.selectedBots.map(async (botId, index) => {
+            const responseDiv = this.createIndividualResponseDiv(botId, index);
+            this.individualResponses.appendChild(responseDiv);
+            
+            // Show typing indicator
+            responseDiv.querySelector('.response-content').innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            // Generate response
+            setTimeout(async () => {
+                const response = await this.generateAIResponse(message, botId);
+                botResponses[index] = response;
+                
+                // Update response content
+                responseDiv.querySelector('.response-content').innerHTML = this.formatAnswer(response);
+                
+                // Highlight code blocks
+                if (window.hljs) {
+                    responseDiv.querySelectorAll('pre code').forEach(block => {
+                        window.hljs.highlightElement(block);
+                    });
+                }
+                
+                // Add to messages array
+                this.messages.push({
+                    content: response,
+                    sender: 'ai',
+                    botId: botId,
+                    timestamp: Date.now()
+                });
+                
+                // Check if all responses are complete
+                if (botResponses.filter(r => r).length === this.selectedBots.length) {
+                    this.sendButton.disabled = false;
+                    this.saveChatHistory();
+                    
+                    // Create ensemble button using FusionService
+                    this.fusionService.createEnsembleButton(
+                        this.chatMessages, // grid container
+                        message,
+                        botResponses,
+                        this.selectedBots,
+                        this.aiModels,
+                        this.chatMessages, // compare container
+                        this.formatAnswer.bind(this),
+                        this.messages,
+                        this.saveChatHistory.bind(this)
+                    );
+                }
+                
+                // Scroll to bottom
+                this.scrollToBottom();
+            }, Math.random() * 2000 + 1000 + (index * 500));
+        });
+        
+        await Promise.all(responsePromises);
+    }
+
+    createIndividualResponseDiv(botId, index) {
+        const model = this.aiModels[botId];
+        const responseDiv = document.createElement('div');
+        responseDiv.className = 'individual-response';
+        responseDiv.dataset.botId = botId;
+        
+        responseDiv.innerHTML = `
+            <div class="response-header">
+                <div class="response-icon">${this.renderModelIcon(model.icon)}</div>
+                <div class="response-name">${model.name}</div>
+            </div>
+            <div class="response-content"></div>
+            <div class="response-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        `;
+        
+        return responseDiv;
+    }
+
+    async generateFusedResponse(userMessage, botResponses) {
+        try {
+            console.log('🔍 Starting fusion process with FusionService...');
+            
+            // Use the FusionService to generate the fused response
+            await this.fusionService.generateFusedResponse(
+                userMessage, 
+                botResponses, 
+                this.selectedBots, 
+                this.aiModels, 
+                this.chatMessages, // Use chatMessages as the grid container
+                this.chatMessages, // Use chatMessages as the compare container
+                this.formatAnswer.bind(this), // Bind the formatAnswer method
+                this.messages, // Pass the messages array
+                this.saveChatHistory.bind(this) // Bind the saveChatHistory method
+            );
+            
+            console.log('✅ Fusion completed successfully');
+            
+        } catch (error) {
+            console.error('❌ Error in generateFusedResponse:', error);
+            
+            // Fallback: show concatenated responses in main chat
+            const fallbackText = botResponses.map((response, index) => {
+                const modelName = this.aiModels[this.selectedBots[index]]?.name || `AI Model ${index + 1}`;
+                return `**${modelName}:**\n${response}`;
+            }).join('\n\n---\n\n');
+            
+            this.addMessage(fallbackText, 'ai', 'fused-fallback');
+            this.saveChatHistory();
+        }
+    }
+
+    // ===== UTILITY METHODS =====
+
+    addMessage(content, sender, botId = null) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+
+        const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+        if (sender === 'user') {
+            messageDiv.innerHTML = `
+                <div class="message-content">${this.escapeHtml(content)}</div>
+                <div class="message-time">${currentTime}</div>
+            `;
+        } else {
+            const botName = botId ? this.aiModels[botId]?.name || 'AI Assistant' : 'AI Assistant';
+            const botIcon = botId ? this.aiModels[botId]?.icon || '🤖' : '🤖';
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <strong>${botIcon} ${botName}:</strong>
+                    <div>${this.formatAnswer(content)}</div>
+                </div>
+                <div class="message-time">${currentTime}</div>
+            `;
+        }
+
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+
+    formatAnswer(text) {
+        return text
+            .replace(/```html([\s\S]*?)```/g, '<pre><code class="language-html">$1</code></pre>')
+            .replace(/```css([\s\S]*?)```/g, '<pre><code class="language-css">$1</code></pre>')
+            .replace(/```javascript([\s\S]*?)```/g, '<pre><code class="language-javascript">$1</code></pre>')
+            .replace(/```scss([\s\S]*?)```/g, '<pre><code class="language-scss">$1</code></pre>')
+            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+            .replace(/\n/g, '<br>');
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    scrollToBottom() {
+        setTimeout(() => {
+            if (this.chatMessages) {
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+            if (this.individualResponses) {
+                this.individualResponses.scrollTop = this.individualResponses.scrollHeight;
+            }
+        }, 100);
+    }
+
+    renderModelIcon(icon) {
+        if (typeof icon === 'string' && (icon.endsWith('.svg') || icon.endsWith('.png'))) {
+            return `<img src='${icon}' class='model-svg-icon' style='width:24px;height:24px;vertical-align:middle;' alt='AI Model Icon' />`;
+        } else {
+            return icon;
+        }
+    }
+
+    // ===== AUTHENTICATION METHODS =====
+
+    checkAuthState() {
+        checkAuthState((user) => {
+            if (user) {
+                this.loadChatHistoryFromFirebase(user.uid);
+                this.showChatArea();
+            } else {
+                this.hideChatArea();
+            }
+        });
+    }
+
+    showAuthModal(isLogin = true) {
+        if (this.authModal) {
+            this.authModal.style.display = 'block';
+            this.modalTitle.textContent = isLogin ? 'Login' : 'Sign Up';
+            this.modalSubmit.textContent = isLogin ? 'Login' : 'Sign Up';
+        }
+    }
+
+    hideAuthModal() {
+        if (this.authModal) {
+            this.authModal.style.display = 'none';
+            this.modalEmail.value = '';
+            this.modalPassword.value = '';
+        }
+    }
+
+    handleAuthSubmit() {
+        const email = this.modalEmail.value.trim();
+        const password = this.modalPassword.value.trim();
+        if (!email || !password) {
+            alert("Email and password are required");
+            return;
+        }
+        
+        const isLogin = this.modalTitle.textContent === 'Login';
+        if (isLogin) {
+            this.loginUser(email, password);
+        } else {
+            this.signUpUser(email, password);
+        }
+    }
+
+    toggleAuthMode() {
+        const isLogin = this.modalTitle.textContent === 'Login';
+        this.showAuthModal(!isLogin);
+    }
+
+    loginUser(email, password) {
+        loginUser(email, password,
+            (userCredential) => {
+                console.log("User signed in with UID:", userCredential.user.uid);
+                this.addMessage(`Welcome ${email.split('@')[0]}! You have successfully logged in.`, 'ai');
+                this.hideAuthModal();
+            },
+            (error) => {
+                console.error("Error signing in:", error.code, error.message);
+                alert(`Error: ${error.message}`);
+            }
+        );
+    }
+
+    signUpUser(email, password) {
+        signUpUser(email, password,
+            (userCredential) => {
+                const userId = userCredential.user.uid;
+                set(ref(this.database, 'users/' + userId), { email: email })
+                    .then(() => {
+                        console.log("User signed up and data saved with UID:", userId);
+                        this.addMessage(`Welcome ${email.split('@')[0]}! You have successfully signed up.`, 'ai');
+                        this.loginUser(email, password);
+                    })
+                    .catch((error) => {
+                        console.error("Error saving data:", error.message);
+                        alert(`Error: ${error.message}`);
+                    });
+            },
+            (error) => {
+                console.error("Error signing up:", error.code, error.message);
+                alert(`Error: ${error.message}`);
+            }
+        );
+    }
+
+    logoutUser() {
+        logoutUser(
+            () => {
+                console.log("User signed out");
+                this.hideChatArea();
+            },
+            (error) => {
+                console.error("Error signing out:", error.message);
+                alert(`Error: ${error.message}`);
+            }
+        );
+    }
+
+    showChatArea() {
+        this.chatMessages.style.display = 'block';
+        this.messageInput.style.display = 'inline';
+        this.sendButton.style.display = 'flex';
+        
+        if (!this.currentChatId || this.messages.length === 0) {
+            this.startNewChat();
+        }
+    }
+
+    hideChatArea() {
+        this.chatMessages.style.display = 'block';
+        this.messageInput.style.display = 'none';
+        this.sendButton.style.display = 'none';
+        
+        this.chatMessages.innerHTML = `
+            <div class="login-message">
+                <div class="login-message-content">
+                    <h2>🔐 Welcome to Prudence AI v2</h2>
+                    <p>Please login or signup to start chatting with our AI models.</p>
+                    <div class="login-actions">
+                        <button class="login-action-btn" onclick="document.querySelector('.login-btn').click()">Login</button>
+                        <button class="login-action-btn" onclick="document.querySelector('.signup-btn').click()">Sign Up</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ===== FIREBASE METHODS =====
+
+    loadChatHistoryFromFirebase(userId) {
+        get(ref(this.database, `users/${userId}/chatHistory`))
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    this.chatHistory = snapshot.val();
+                    this.renderChatHistory();
+                } else {
+                    this.chatHistory = [];
+                    this.renderChatHistory();
+                }
+            })
+            .catch((error) => {
+                console.error("Error loading chat history:", error);
+                this.chatHistory = [];
+                this.renderChatHistory();
+            });
+    }
+
+    saveChatHistory() {
+        const user = this.auth.currentUser;
+        if (user && this.messages.length > 0) {
+            const existingChatIndex = this.chatHistory.findIndex(chat => chat.id === this.currentChatId);
+            const chatData = {
+                id: this.currentChatId,
+                title: this.messages[0].content.substring(0, 30) + (this.messages[0].content.length > 30 ? '...' : ''),
+                messages: this.messages,
+                lastUpdated: Date.now()
+            };
+
+            if (existingChatIndex !== -1) {
+                this.chatHistory[existingChatIndex] = chatData;
+            } else {
+                this.chatHistory.unshift(chatData);
+            }
+
+            this.chatHistory = this.chatHistory.slice(0, 20);
+
+            set(ref(this.database, `users/${user.uid}/chatHistory`), this.chatHistory)
+                .then(() => {
+                    console.log("Chat history saved to Firebase");
+                })
+                .catch((error) => {
+                    console.error("Error saving chat history to Firebase:", error);
+                });
+
+            this.renderChatHistory();
+        }
+    }
+
+    renderChatHistory() {
+        if (!this.chatHistoryList) return;
+        
+        this.chatHistoryList.innerHTML = '';
+        
+        this.chatHistory.forEach(chat => {
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            
+            if (chat.id === this.currentChatId) {
+                chatItem.classList.add('active');
+            }
+
+            const lastMessage = chat.messages[chat.messages.length - 1];
+            const preview = lastMessage ? lastMessage.content.substring(0, 50) + '...' : '';
+
+            chatItem.innerHTML = `
+                <div class="chat-title">${chat.title}</div>
+                <div class="chat-preview">${preview}</div>
+            `;
+
+            chatItem.addEventListener('click', () => this.loadChat(chat));
+            this.chatHistoryList.appendChild(chatItem);
+        });
+    }
+
+    loadChat(chat) {
+        this.currentChatId = chat.id;
+        this.messages = [...chat.messages];
+        
+        this.chatMessages.innerHTML = '';
+        this.messages.forEach(message => {
+            this.addMessage(message.content, message.sender, message.botId);
+        });
+        
+        this.renderChatHistory();
+        this.scrollToBottom();
+    }
+
+    clearChatHistory() {
+        if (confirm('Are you sure you want to clear all chat history?')) {
+            this.chatHistory = [];
+            this.renderChatHistory();
+            
+            const user = this.auth.currentUser;
+            if (user) {
+                set(ref(this.database, `users/${user.uid}/chatHistory`), [])
+                    .then(() => console.log("Chat history cleared from Firebase"))
+                    .catch((error) => console.error("Error clearing chat history:", error));
+            }
+        }
+    }
+
+    // ===== AI RESPONSE GENERATION =====
+
+    async generateAIResponse(userMessage, botId) {
+        const model = this.aiModels[botId];
+        const lowerMessage = userMessage.toLowerCase();
+
+        // Check for FAQ answer first
+        const faqAnswer = this.getFaqAnswer(userMessage);
+        if (faqAnswer) return faqAnswer;
+
+        // Handle Cerebras API calls
+        const cerebrasModelKeys = [
+            'llama3-8b', 'llama3-70b', 'llama4-scout-17b-16e-instruct',
+            'llama4-maverick-17b-128e-instruct', 'qwen-3-32b', 'qwen-3-235b-a22b'
+        ];
+        
+        if (cerebrasModelKeys.includes(botId)) {
+            try {
+                const maxTokens = (botId.includes('qwen')) ? 12000 : 1000;
+                const cerebrasResult = await cerebrasAPI.generateResponse(userMessage, {
+                    maxTokens: maxTokens,
+                    temperature: this.modelTemperatures[botId] || 0.7,
+                    model: botId
+                });
+                
+                if (cerebrasResult.success) {
+                    let responseText = cerebrasResult.text;
+                    if (botId.includes('qwen')) {
+                        responseText = this.filterQwenResponse(responseText);
+                    }
+                    return responseText;
+                } else {
+                    return `Sorry, I couldn't get a response from Cerebras: ${cerebrasResult.error}`;
+                }
+            } catch (error) {
+                console.error('Error calling Cerebras API:', error);
+                return `Sorry, there was an error connecting to Cerebras: ${error.message}`;
+            }
+        }
+
+        // Handle Gemini API calls
+        const geminiModelKeys = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+        if (geminiModelKeys.includes(botId)) {
+            try {
+                const geminiResult = await geminiAPI.generateResponse(userMessage, {
+                    model: botId,
+                    temperature: this.modelTemperatures[botId] || 0.7,
+                    maxTokens: 1000
+                });
+                
+                let responseText = '';
+                if (geminiResult.text) {
+                    responseText = geminiResult.text;
+                } else if (geminiResult.response && geminiResult.response.text) {
+                    responseText = geminiResult.response.text;
+                } else if (typeof geminiResult === 'string') {
+                    responseText = geminiResult;
+                } else {
+                    return `Sorry, there was an issue with the Gemini API response format.`;
+                }
+                
+                return responseText;
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                return `Sorry, there was an error connecting to Gemini: ${error.message}`;
+            }
+        }
+
+        // Fallback responses
+        if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+            return `Hello! I'm ${model.name}, your AI assistant. ${model.description}. How can I help you today?`;
+        } else if (lowerMessage.includes('how are you')) {
+            return `I'm doing great, thank you for asking! As ${model.name}, I'm here and ready to assist you.`;
+        } else if (lowerMessage.includes('what can you do')) {
+            return `As ${model.name}, I can help you with a wide variety of tasks. ${model.description}. What would you like to explore?`;
+        } else {
+            const responses = model.responses || ['I\'m here to help!', 'How can I assist you today?'];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+    }
+
+    filterQwenResponse(responseText) {
+        let filteredText = responseText;
+        filteredText = filteredText.replace(/<think>.*?<\/think>/gs, '');
+        filteredText = filteredText.replace(/Let me think about this.*?\./gs, '');
+        filteredText = filteredText.replace(/Let me analyze.*?\./gs, '');
+        filteredText = filteredText.replace(/First, I need to.*?\./gs, '');
+        filteredText = filteredText.replace(/I should.*?\./gs, '');
+        filteredText = filteredText.replace(/Okay, so.*?\./gs, '');
+        filteredText = filteredText.replace(/\n\s*\n\s*\n/g, '\n\n');
+        filteredText = filteredText.trim();
+        
+        if (!filteredText || filteredText.length < 10) {
+            return responseText;
+        }
+        
+        return filteredText;
+    }
+
+    // ===== FAQ METHODS =====
+
+    loadFaqsFromFirebase() {
+        loadFaqsFromFirebase(
+            (faqs) => { this.faqs = faqs; },
+            (personalityFaqs) => { this.personalityFaqs = personalityFaqs; }
+        );
+    }
+
+    getFaqAnswer(message) {
+        return getFaqAnswer(message, this.faqs, this.personalityFaqs);
+    }
+
+    // ===== UTILITY METHODS =====
+
+    toggleCompareMode() {
+        this.compareMode = true;
+        if (this.compareToggle) {
+            this.compareToggle.classList.add('active');
+        }
+    }
+
+    attachFiles() {
+        // Create file input element
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.multiple = true;
+        fileInput.accept = '.txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.mp4,.mp3,.wav,.zip,.rar';
+        
+        fileInput.addEventListener('change', (event) => {
+            const files = Array.from(event.target.files);
+            
+            if (files.length === 0) return;
+            
+            // Validate file sizes (max 10MB per file)
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const validFiles = files.filter(file => {
+                if (file.size > maxSize) {
+                    alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
+                    return false;
+                }
+                return true;
+            });
+            
+            if (validFiles.length === 0) return;
+            
+            // Create attachment preview
+            this.createAttachmentPreview(validFiles);
+            
+            // Add files to message input
+            this.addFilesToMessage(validFiles);
+        });
+        
+        fileInput.click();
+    }
+
+    createAttachmentPreview(files) {
+        // Remove existing attachment preview
+        const existingPreview = document.querySelector('.attachment-preview');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+        
+        // Create attachment preview container
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'attachment-preview';
+        previewContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        `;
+        
+        const header = document.createElement('div');
+        header.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        `;
+        
+        header.innerHTML = `
+            <span style="font-weight: 600; color: #333;">📎 Attachments (${files.length})</span>
+            <button class="close-attachments" style="
+                background: none;
+                border: none;
+                font-size: 18px;
+                cursor: pointer;
+                color: #999;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">&times;</button>
+        `;
+        
+        previewContainer.appendChild(header);
+        
+        // Add file previews
+        files.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px;
+                border-radius: 4px;
+                background: #f8f9fa;
+                margin-bottom: 8px;
+            `;
+            
+            const fileIcon = this.getFileIcon(file.type);
+            const fileSize = this.formatFileSize(file.size);
+            
+            fileItem.innerHTML = `
+                <span style="font-size: 20px;">${fileIcon}</span>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 12px; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${file.name}</div>
+                    <div style="font-size: 10px; color: #666;">${fileSize}</div>
+                </div>
+                <button class="remove-file" data-index="${index}" style="
+                    background: #dc3545;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    width: 20px;
+                    height: 20px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">×</button>
+            `;
+            
+            previewContainer.appendChild(fileItem);
+        });
+        
+        document.body.appendChild(previewContainer);
+        
+        // Add event listeners
+        previewContainer.querySelector('.close-attachments').addEventListener('click', () => {
+            previewContainer.remove();
+            this.clearAttachments();
+        });
+        
+        previewContainer.querySelectorAll('.remove-file').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                this.removeAttachment(index);
+                previewContainer.remove();
+                this.createAttachmentPreview(this.attachments || []);
+            });
+        });
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (previewContainer.parentNode) {
+                previewContainer.remove();
+            }
+        }, 10000);
+    }
+
+    getFileIcon(mimeType) {
+        if (mimeType.startsWith('image/')) return '🖼️';
+        if (mimeType.startsWith('video/')) return '🎥';
+        if (mimeType.startsWith('audio/')) return '🎵';
+        if (mimeType.includes('pdf')) return '📄';
+        if (mimeType.includes('word') || mimeType.includes('document')) return '📝';
+        if (mimeType.includes('zip') || mimeType.includes('rar')) return '📦';
+        return '📎';
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    addFilesToMessage(files) {
+        this.attachments = files;
+        
+        // Add file info to message input
+        const fileInfo = files.map(file => `📎 ${file.name} (${this.formatFileSize(file.size)})`).join('\n');
+        
+        if (this.messageInput.value.trim()) {
+            this.messageInput.value += '\n\n' + fileInfo;
+        } else {
+            this.messageInput.value = fileInfo;
+        }
+        
+        // Update send button state
+        this.updateSendButtonState();
+    }
+
+    removeAttachment(index) {
+        if (this.attachments && this.attachments[index]) {
+            this.attachments.splice(index, 1);
+            this.updateSendButtonState();
+        }
+    }
+
+    clearAttachments() {
+        this.attachments = [];
+        this.updateSendButtonState();
+    }
+
+    updateSendButtonState() {
+        if (this.sendButton) {
+            const hasText = this.messageInput.value.trim().length > 0;
+            const hasAttachments = this.attachments && this.attachments.length > 0;
+            this.sendButton.disabled = !(hasText || hasAttachments);
+        }
+    }
+
+    optimizePrompt() {
+        const currentPrompt = this.messageInput.value.trim();
+        
+        if (!currentPrompt) {
+            alert('Please enter a prompt to optimize.');
+            return;
+        }
+        
+        // Create prompt optimizer modal
+        this.createPromptOptimizerModal(currentPrompt);
+    }
+
+    createPromptOptimizerModal(originalPrompt) {
+        // Remove existing modal
+        const existingModal = document.querySelector('.prompt-optimizer-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create modal overlay
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'prompt-optimizer-modal-overlay';
+        modalOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        `;
+        
+        // Create modal content
+        const modalContent = document.createElement('div');
+        modalContent.className = 'prompt-optimizer-modal';
+        modalContent.style.cssText = `
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        `;
+        
+        modalContent.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #333; font-size: 20px;">🎯 Prompt Optimizer</h3>
+                <button class="close-optimizer" style="
+                    background: none;
+                    border: none;
+                    font-size: 24px;
+                    cursor: pointer;
+                    color: #999;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Original Prompt:</label>
+                <textarea id="original-prompt" readonly style="
+                    width: 100%;
+                    min-height: 80px;
+                    padding: 12px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    font-size: 14px;
+                    resize: vertical;
+                    background: #f8f9fa;
+                ">${originalPrompt}</textarea>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Optimization Style:</label>
+                <select id="optimization-style" style="
+                    width: 100%;
+                    padding: 12px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    background: white;
+                ">
+                    <option value="professional">Professional & Formal</option>
+                    <option value="casual">Casual & Friendly</option>
+                    <option value="detailed">Detailed & Comprehensive</option>
+                    <option value="concise">Concise & Direct</option>
+                    <option value="creative">Creative & Engaging</option>
+                    <option value="technical">Technical & Precise</option>
+                    <option value="educational">Educational & Explanatory</option>
+                    <option value="conversational">Conversational & Natural</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Optimized Prompt:</label>
+                <textarea id="optimized-prompt" style="
+                    width: 100%;
+                    min-height: 120px;
+                    padding: 12px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    font-size: 14px;
+                    resize: vertical;
+                "></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="cancel-optimizer" style="
+                    padding: 10px 20px;
+                    border: 2px solid #ddd;
+                    background: white;
+                    color: #666;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                ">Cancel</button>
+                <button class="apply-optimized" style="
+                    padding: 10px 20px;
+                    border: none;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                ">Apply Optimized Prompt</button>
+            </div>
+        `;
+        
+        modalOverlay.appendChild(modalContent);
+        document.body.appendChild(modalOverlay);
+        
+        // Get elements
+        const styleSelect = modalContent.querySelector('#optimization-style');
+        const optimizedTextarea = modalContent.querySelector('#optimized-prompt');
+        const closeBtn = modalContent.querySelector('.close-optimizer');
+        const cancelBtn = modalContent.querySelector('.cancel-optimizer');
+        const applyBtn = modalContent.querySelector('.apply-optimized');
+        
+        // Optimize prompt when style changes
+        styleSelect.addEventListener('change', () => {
+            const optimizedPrompt = this.optimizePromptText(originalPrompt, styleSelect.value);
+            optimizedTextarea.value = optimizedPrompt;
+        });
+        
+        // Initial optimization
+        const initialOptimized = this.optimizePromptText(originalPrompt, styleSelect.value);
+        optimizedTextarea.value = initialOptimized;
+        
+        // Close modal handlers
+        const closeModal = () => {
+            document.body.removeChild(modalOverlay);
+        };
+        
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        
+        // Apply optimized prompt
+        applyBtn.addEventListener('click', () => {
+            const optimizedPrompt = optimizedTextarea.value.trim();
+            if (optimizedPrompt) {
+                this.messageInput.value = optimizedPrompt;
+                this.messageInput.focus();
+                closeModal();
+            }
+        });
+    }
+
+    optimizePromptText(prompt, style) {
+        const optimizations = {
+            professional: {
+                prefix: "Please provide a professional and comprehensive response to the following query: ",
+                suffix: " Please ensure your response is well-structured, accurate, and suitable for a professional context.",
+                transform: (text) => text.replace(/^(hi|hello|hey)/i, "Greetings").replace(/!+$/, ".")
+            },
+            casual: {
+                prefix: "Hey! I'd love to get your thoughts on this: ",
+                suffix: " Feel free to be conversational and friendly in your response!",
+                transform: (text) => text.replace(/^(greetings|good day)/i, "Hey").replace(/\.$/, "!")
+            },
+            detailed: {
+                prefix: "Please provide a detailed and comprehensive analysis of the following: ",
+                suffix: " Please include relevant examples, explanations, and context to ensure a thorough understanding.",
+                transform: (text) => text + " (Please provide detailed explanations and examples)"
+            },
+            concise: {
+                prefix: "Please provide a clear and concise response to: ",
+                suffix: " Please keep your response direct and to the point.",
+                transform: (text) => text.replace(/\s+/g, ' ').trim()
+            },
+            creative: {
+                prefix: "Let's get creative! I'd love to see your imaginative take on: ",
+                suffix: " Feel free to be creative, innovative, and engaging in your response!",
+                transform: (text) => text.replace(/^(what is|how do|explain)/i, "What's your creative perspective on")
+            },
+            technical: {
+                prefix: "Please provide a technical and precise analysis of: ",
+                suffix: " Please include relevant technical details, specifications, and accurate information.",
+                transform: (text) => text + " (Please provide technical details and specifications)"
+            },
+            educational: {
+                prefix: "I'd like to learn more about this topic. Please explain: ",
+                suffix: " Please provide educational content that helps me understand this topic thoroughly.",
+                transform: (text) => text.replace(/^(what is|how do)/i, "Can you teach me about")
+            },
+            conversational: {
+                prefix: "I'm curious about this and would love to chat about: ",
+                suffix: " Please respond in a natural, conversational way as if we're having a friendly discussion.",
+                transform: (text) => text.replace(/^(what|how|why|when|where)/i, "What do you think about")
+            }
+        };
+        
+        const optimization = optimizations[style] || optimizations.professional;
+        let optimizedText = optimization.transform(prompt);
+        
+        // Add prefix and suffix
+        optimizedText = optimization.prefix + optimizedText + optimization.suffix;
+        
+        return optimizedText;
+    }
+
+    openSettings() {
+        // TODO: Implement settings functionality
+        alert('Settings feature coming soon!');
+    }
+
+    closeComparePopoutModal() {
+        if (this.comparePopoutModal) {
+            this.comparePopoutModal.classList.remove('active');
+        }
+    }
+}
+
+// ===== INITIALIZATION =====
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.prudenceAI = new PrudenceAIV2();
+    initializeThemeToggle();
+});
+
+// ===== HELPER FUNCTIONS =====
+
+// Pretty JSON viewer function
+function renderJsonAsHtml(obj, indent = 0) {
+    let html = '';
+    if (Array.isArray(obj)) {
+        html += '[<br>';
+        obj.forEach((item, idx) => {
+            html += '&nbsp;'.repeat(indent + 2) + renderJsonAsHtml(item, indent + 2) + (idx < obj.length - 1 ? ',' : '') + '<br>';
+        });
+        html += '&nbsp;'.repeat(indent) + ']';
+    } else if (typeof obj === 'object' && obj !== null) {
+        html += '{<br>';
+        Object.entries(obj).forEach(([key, value], idx, arr) => {
+            html += '&nbsp;'.repeat(indent + 2) + `<span style="color:#20603d;font-weight:bold;">"${key}"</span>: ` + renderJsonAsHtml(value, indent + 2) + (idx < arr.length - 1 ? ',' : '') + '<br>';
+        });
+        html += '&nbsp;'.repeat(indent) + '}';
+    } else if (typeof obj === 'string') {
+        html += `<span style="color:#a31515;">"${obj}"</span>`;
+    } else {
+        html += `<span style="color:#1a1a1a;">${obj}</span>`;
+    }
+    return html;
+} 
