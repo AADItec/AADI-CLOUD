@@ -367,7 +367,7 @@ html, body {
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(5px);
@@ -381,6 +381,10 @@ html, body {
 
 .dropdown-toggle .fas.fa-chevron-up {
     display: none;
+}
+
+.dropdown-toggle .fas.fa-chevron-down {
+    margin-right: 8px;
 }
 
 .dropdown-toggle.active .fas.fa-chevron-down {
@@ -941,6 +945,12 @@ html, body {
     color: #999;
 }
 
+.message-input:focus {
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 .send-btn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
@@ -1248,6 +1258,12 @@ body.dark-theme .message-input {
 
 body.dark-theme .message-input::placeholder {
     color: rgba(255, 255, 255, 0.6);
+}
+
+body.dark-theme .message-input:focus {
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
 }
 
 body.dark-theme .theme-btn,
@@ -1759,6 +1775,7 @@ body.dark-theme .dropdown-toggle {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
+    justify-content: flex-start;
 }
 
 body.dark-theme .dropdown-toggle:hover {
@@ -1818,3 +1835,81 @@ body.dark-theme .compare-response-fused .compare-popout-btn:hover {
 }
 
 /* Force refresh - 08/01/2025 11:19:11 */
+
+/* Ensure SVG icons are visible in all contexts */
+.model-option-icon svg,
+.response-icon svg,
+.compare-response-icon svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    fill: currentColor !important;
+}
+
+/* Specific styling for individual response icons */
+.individual-response .response-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.individual-response .response-icon svg {
+    fill: white !important;
+    filter: brightness(1.2) !important;
+}
+
+/* Specific styling for fused response icon */
+.compare-response-fused .compare-response-icon {
+    background: rgba(76, 175, 80, 0.1) !important;
+    border: 1px solid rgba(76, 175, 80, 0.3) !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+}
+
+.compare-response-fused .compare-response-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    fill: #4CAF50 !important;
+    filter: brightness(1.5) !important;
+    display: block !important;
+}
+
+/* Specific styling for Qwen 3 icon in individual responses */
+.individual-response .response-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    fill: white !important;
+    filter: brightness(1.5) !important;
+    display: block !important;
+}
+
+/* Ensure all SVG icons have proper contrast */
+.response-icon svg,
+.compare-response-icon svg {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Dark theme for SVG icons */
+body.dark-theme .model-option-icon svg,
+body.dark-theme .response-icon svg,
+body.dark-theme .compare-response-icon svg {
+    fill: white !important;
+    filter: brightness(1.5) !important;
+}
+
+body.dark-theme .individual-response .response-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+body.dark-theme .compare-response-fused .compare-response-icon {
+    background: rgba(76, 175, 80, 0.2) !important;
+    border: 1px solid rgba(76, 175, 80, 0.4) !important;
+}
+
+body.dark-theme .compare-response-fused .compare-response-icon svg {
+    fill: #4CAF50 !important;
+    filter: brightness(1.5) !important;
+}
