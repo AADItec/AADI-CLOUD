@@ -418,19 +418,29 @@ html, body {
 .model-option {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    padding: 12px 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 10;
 }
 
 .model-option:hover {
-    background: rgba(102, 126, 234, 0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .model-option:last-child {
     border-bottom: none;
+}
+
+.model-option.selected {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.model-option.selected .model-option-checkbox {
+    background: #667eea;
+    color: white;
 }
 
 .model-option-icon {
@@ -538,22 +548,28 @@ html, body {
 .selected-model-tag .remove-btn {
     background: rgba(220, 53, 69, 0.1);
     border: none;
-    border-radius: 4px;
-    width: 16px;
-    height: 16px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: #dc3545;
-    font-size: 8px;
+    font-size: 10px;
     transition: all 0.3s ease;
+    margin-left: 8px;
+    flex-shrink: 0;
 }
 
 .selected-model-tag .remove-btn:hover {
     background: #dc3545;
     color: white;
     transform: scale(1.1);
+}
+
+.selected-model-tag .remove-btn:active {
+    transform: scale(0.95);
 }
 
 .no-models {
@@ -927,8 +943,20 @@ html, body {
 }
 
 .attachment-btn:hover, .optimize-btn:hover {
-    background: rgba(102, 126, 234, 0.2);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.attachment-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.1);
+    transform: none;
+}
+
+.attachment-btn:disabled:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: none;
 }
 
 .message-input {
@@ -1294,6 +1322,16 @@ body.dark-theme .optimize-btn {
 body.dark-theme .attachment-btn:hover,
 body.dark-theme .optimize-btn:hover {
     background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .attachment-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .attachment-btn:disabled:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Responsive Design */
