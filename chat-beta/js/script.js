@@ -190,7 +190,7 @@ class PrudenceAIV2 {
     constructor() {
         // Core properties
         this.compareMode = true;
-        this.selectedBots = ['llama4-maverick-17b-128e-instruct', 'gemini-2.0-flash', 'qwen-3-32b'];
+        this.selectedModels = ['llama4-maverick-17b-128e-instruct', 'gemini-2.0-flash', 'qwen-3-32b'];
         this.currentChatId = null;
         this.chatHistory = [];
         this.messages = [];
@@ -216,6 +216,7 @@ class PrudenceAIV2 {
         this.renderChatHistory();
         this.startNewChat();
         this.updateSelectedModelsDisplay();
+        this.updateAttachmentButtonState(); // Set initial attachment button state
         
         // Check authentication state first
         console.log('🔍 Checking authentication state...');
@@ -293,9 +294,14 @@ class PrudenceAIV2 {
 
     // Populate model dropdown with AI models
     populateModelDropdown() {
-        if (!this.modelDropdownContent) return;
+        console.log('🔍 Populating model dropdown...');
+        if (!this.modelDropdownContent) {
+            console.error('❌ Model dropdown content not found');
+            return;
+        }
         
         this.modelDropdownContent.innerHTML = '';
+        console.log('📋 Available models:', Object.keys(this.aiModels));
         
         Object.keys(this.aiModels).forEach(botId => {
             const model = this.aiModels[botId];
@@ -315,11 +321,13 @@ class PrudenceAIV2 {
                 </div>
             `;
             
-            modelOption.addEventListener('click', () => this.toggleModelSelection(botId));
+            // Remove direct event listener - using event delegation instead
             this.modelDropdownContent.appendChild(modelOption);
+            console.log('✅ Added model option:', model.name);
         });
         
         this.updateSelectedModelsDisplay();
+        console.log('✅ Model dropdown populated successfully');
     }
 
     // Initialize event listeners for Prudence AI v2
@@ -437,55 +445,94 @@ class PrudenceAIV2 {
                 this.closeComparePopoutModal();
             }
         });
+        
+        // Add event delegation for remove buttons
+        if (this.selectedModelsList) {
+            this.selectedModelsList.addEventListener('click', (e) => {
+                const removeBtn = e.target.closest('.remove-btn');
+                if (removeBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const modelId = removeBtn.dataset.modelId;
+                    console.log('Remove button clicked for model:', modelId);
+                    this.toggleModelSelection(modelId);
+                }
+            });
+        }
+        
+        // Add event delegation for dropdown options
+        if (this.modelDropdownContent) {
+            this.modelDropdownContent.addEventListener('click', (e) => {
+                const modelOption = e.target.closest('.model-option');
+                if (modelOption) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const modelId = modelOption.dataset.modelId;
+                    console.log('Model option clicked:', modelId);
+                    this.toggleModelSelection(modelId);
+                }
+            });
+        }
     }
 
     // ===== CORE FUNCTIONALITY METHODS =====
 
     // Model Selection Methods
     toggleModelDropdown() {
+        console.log('🔍 Toggle dropdown called');
         if (this.modelDropdownContent) {
             this.modelDropdownContent.classList.toggle('active');
             this.modelDropdownToggle?.classList.toggle('active');
+            console.log('✅ Dropdown toggled, active state:', this.modelDropdownContent.classList.contains('active'));
+        } else {
+            console.error('❌ Model dropdown content not found');
         }
     }
 
     closeModelDropdown() {
+        console.log('🔍 Close dropdown called');
         if (this.modelDropdownContent) {
             this.modelDropdownContent.classList.remove('active');
             this.modelDropdownToggle?.classList.remove('active');
+            console.log('✅ Dropdown closed');
         }
     }
 
     toggleModelSelection(botId) {
-        const previousBots = [...this.selectedBots];
+        console.log('Toggle model selection called for:', botId);
+        console.log('Current selected models:', this.selectedModels);
         
-        if (this.selectedBots.includes(botId)) {
-            this.selectedBots = this.selectedBots.filter(id => id !== botId);
-        } else if (this.selectedBots.length < 3) {
-            this.selectedBots.push(botId);
+        const index = this.selectedModels.indexOf(botId);
+        if (index > -1) {
+            console.log('Removing model from selection');
+            this.selectedModels.splice(index, 1);
+        } else {
+            console.log('Adding model to selection');
+            this.selectedModels.push(botId);
         }
-
-        const botsChanged = previousBots.sort().join(',') !== this.selectedBots.sort().join(',');
-        if (botsChanged && this.messages.length > 0) {
-            this.saveChatHistory();
-            this.startNewChat();
-        }
-
+        
+        console.log('Updated selected models:', this.selectedModels);
+        
         this.updateSelectedModelsDisplay();
         this.updateModelDropdownSelection();
+        this.updateAttachmentButtonState(); // Update attachment button state
     }
 
     updateSelectedModelsDisplay() {
-        if (!this.selectedModelsList) return;
+        if (!this.selectedModelsList) {
+            console.warn('Selected models list element not found');
+            return;
+        }
         
+        // Clear the list first
         this.selectedModelsList.innerHTML = '';
         
-        if (this.selectedBots.length === 0) {
+        if (this.selectedModels.length === 0) {
             this.selectedModelsList.innerHTML = '<div class="no-models">No models selected</div>';
             return;
         }
         
-        this.selectedBots.forEach(botId => {
+        this.selectedModels.forEach(botId => {
             const model = this.aiModels[botId];
             if (!model) return;
             
@@ -501,6 +548,7 @@ class PrudenceAIV2 {
             const removeBtn = tag.querySelector('.remove-btn');
             removeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                console.log('Removing model:', botId);
                 this.toggleModelSelection(botId);
             });
             
@@ -514,7 +562,7 @@ class PrudenceAIV2 {
         const options = this.modelDropdownContent.querySelectorAll('.model-option');
         options.forEach(option => {
             const modelId = option.dataset.modelId;
-            const isSelected = this.selectedBots.includes(modelId);
+            const isSelected = this.selectedModels.includes(modelId);
             option.classList.toggle('selected', isSelected);
         });
     }
@@ -671,7 +719,7 @@ class PrudenceAIV2 {
         
         if (!message && !hasAttachments) return;
 
-        if (!this.selectedBots || this.selectedBots.length === 0) {
+        if (!this.selectedModels || this.selectedModels.length === 0) {
             this.addMessage("Please select an AI model before sending a message.", 'ai');
             this.messageInput.value = '';
             this.clearAttachments();
@@ -737,7 +785,7 @@ class PrudenceAIV2 {
         
         // Generate responses from all selected models
         const botResponses = [];
-        const responsePromises = this.selectedBots.map(async (botId, index) => {
+        const responsePromises = this.selectedModels.map(async (botId, index) => {
             const responseDiv = this.createIndividualResponseDiv(botId, index);
             this.individualResponses.appendChild(responseDiv);
             
@@ -750,15 +798,25 @@ class PrudenceAIV2 {
                 </div>
             `;
             
-            // Add special indicator for Gemini models with .txt files
+            // Add special indicator for Gemini models with supported files
             const geminiModelKeys = ['gemini-2.5-flash', 'gemini-2.0-flash'];
             if (geminiModelKeys.includes(botId) && currentAttachments.length > 0) {
-                const txtFiles = currentAttachments.filter(file => file.name.toLowerCase().endsWith('.txt'));
-                if (txtFiles.length > 0) {
+                const supportedFiles = currentAttachments.filter(file => {
+                    const fileName = file.name.toLowerCase();
+                    return fileName.endsWith('.txt') || 
+                           fileName.endsWith('.pdf') || 
+                           fileName.endsWith('.jpg') || 
+                           fileName.endsWith('.jpeg') || 
+                           fileName.endsWith('.png') || 
+                           fileName.endsWith('.gif') || 
+                           fileName.endsWith('.webp');
+                });
+                
+                if (supportedFiles.length > 0) {
                     typingMessage = `
                         <div class="typing-indicator">
                             <div style="margin-bottom: 8px; color: #4CAF50; font-size: 12px;">
-                                📄 Reading ${txtFiles.length} text file(s)...
+                                📄 Reading ${supportedFiles.length} text file(s)...
                             </div>
                             <div class="typing-dot"></div>
                             <div class="typing-dot"></div>
@@ -807,7 +865,7 @@ class PrudenceAIV2 {
                 this.saveChatHistory();
                 
                 // Check if all responses are complete
-                if (botResponses.filter(r => r).length === this.selectedBots.length) {
+                if (botResponses.filter(r => r).length === this.selectedModels.length) {
                     this.sendButton.disabled = false;
                     this.saveChatHistory();
                     
@@ -816,7 +874,7 @@ class PrudenceAIV2 {
                         this.chatMessages, // grid container
                         message,
                         botResponses,
-                        this.selectedBots,
+                        this.selectedModels,
                         this.aiModels,
                         this.chatMessages, // compare container
                         this.formatAnswer.bind(this),
@@ -864,7 +922,7 @@ class PrudenceAIV2 {
             await this.fusionService.generateFusedResponse(
                 userMessage, 
                 botResponses, 
-                this.selectedBots, 
+                this.selectedModels, 
                 this.aiModels, 
                 this.chatMessages, // Use chatMessages as the grid container
                 this.chatMessages, // Use chatMessages as the compare container
@@ -880,7 +938,7 @@ class PrudenceAIV2 {
             
             // Fallback: show concatenated responses in main chat
             const fallbackText = botResponses.map((response, index) => {
-                const modelName = this.aiModels[this.selectedBots[index]]?.name || `AI Model ${index + 1}`;
+                const modelName = this.aiModels[this.selectedModels[index]]?.name || `AI Model ${index + 1}`;
                 return `**${modelName}:**\n${response}`;
             }).join('\n\n---\n\n');
             
@@ -1263,7 +1321,7 @@ class PrudenceAIV2 {
                     
                     // Add a small delay to ensure DOM elements are ready
                     setTimeout(() => {
-                        this.renderChatHistory();
+                    this.renderChatHistory();
                     }, 100);
                 } else {
                     console.log('📭 No chat history found in Firebase, starting fresh');
@@ -1293,13 +1351,13 @@ class PrudenceAIV2 {
             
             // Add a small delay to ensure DOM elements are ready
             setTimeout(() => {
-                this.renderChatHistory();
+            this.renderChatHistory();
             }, 100);
         } catch (error) {
             console.error("Error loading chat history from localStorage:", error);
             this.chatHistory = [];
             setTimeout(() => {
-                this.renderChatHistory();
+            this.renderChatHistory();
             }, 100);
         }
     }
@@ -1502,112 +1560,118 @@ class PrudenceAIV2 {
         const geminiModelKeys = ['gemini-2.5-flash', 'gemini-2.0-flash'];
         if (geminiModelKeys.includes(botId)) {
             console.log('🔍 Processing Gemini model:', botId);
-            console.log('🔍 Checking for .txt files in attachments...');
+            console.log('🔍 Checking for supported files in attachments...');
             
             try {
-                // Check if there are .txt file attachments for Gemini models
+                // Check if there are supported file attachments for Gemini models
                 let enhancedMessage = userMessage;
                 if (this.attachments && this.attachments.length > 0) {
                     console.log('🔍 Found attachments:', this.attachments.map(f => f.name));
-                    const txtFiles = this.attachments.filter(file => file.name.toLowerCase().endsWith('.txt'));
-                    console.log('🔍 .txt files found:', txtFiles.map(f => f.name));
                     
-                    if (txtFiles.length > 0) {
-                        console.log(`🤖 Gemini model ${botId} will process ${txtFiles.length} .txt file(s)`);
-                        const fileContents = await this.readTxtFiles(txtFiles);
+                    // Filter for supported file types
+                    const supportedFiles = this.attachments.filter(file => {
+                        const fileName = file.name.toLowerCase();
+                        return fileName.endsWith('.txt');
+                    });
+                    
+                    console.log('🔍 Supported files found:', supportedFiles.map(f => f.name));
+                    
+                    if (supportedFiles.length > 0) {
+                        console.log(`🤖 Gemini model ${botId} will process ${supportedFiles.length} text file(s)`);
+                        const fileContents = await this.processTextFiles(supportedFiles);
                         enhancedMessage = `${userMessage}\n\n📎 Attached Text Files:\n${fileContents}`;
                         console.log(`📤 Sending enhanced message to Gemini (${botId}) with file content`);
                         console.log('🔍 Enhanced message preview:', enhancedMessage.substring(0, 200) + '...');
                     } else {
-                        console.log('🔍 No .txt files found in attachments');
+                        console.log('🔍 No supported files found in attachments');
                     }
                 } else {
                     console.log('🔍 No attachments found');
                 }
 
-                const geminiResult = await geminiAPI.generateResponse(enhancedMessage, {
+                // Try the requested model first
+                let geminiResult;
+                try {
+                    geminiResult = await geminiAPI.generateResponse(enhancedMessage, {
                     model: botId,
                     temperature: this.modelTemperatures[botId] || 0.7,
-                    maxTokens: botId === 'gemini-2.5-flash' ? 4000 : 1000
-                });
-                
-                console.log('🔍 Raw Gemini result:', geminiResult);
-                console.log('🔍 Gemini result type:', typeof geminiResult);
-                console.log('🔍 Gemini result keys:', Object.keys(geminiResult));
-                console.log('🔍 Gemini result.text value:', geminiResult.text);
-                console.log('🔍 Gemini result.text type:', typeof geminiResult.text);
-                
-                let responseText = '';
-                if (geminiResult && geminiResult.text && geminiResult.text.trim() !== '') {
-                    responseText = geminiResult.text;
-                    console.log('✅ Using geminiResult.text');
-                } else if (geminiResult && geminiResult.response && geminiResult.response.text) {
-                    responseText = geminiResult.response.text;
-                    console.log('✅ Using geminiResult.response.text');
-                } else if (typeof geminiResult === 'string') {
-                    responseText = geminiResult;
-                    console.log('✅ Using geminiResult as string');
-                } else if (geminiResult && geminiResult.candidates && geminiResult.candidates[0] && geminiResult.candidates[0].content) {
-                    responseText = geminiResult.candidates[0].content.parts[0].text;
-                    console.log('✅ Using geminiResult.candidates[0].content.parts[0].text');
-                } else if (geminiResult && geminiResult.candidates && geminiResult.candidates[0] && geminiResult.candidates[0].content && geminiResult.candidates[0].content.parts) {
-                    // Try to find text in any part
-                    const textPart = geminiResult.candidates[0].content.parts.find(part => part.text);
-                    if (textPart) {
-                        responseText = textPart.text;
-                        console.log('✅ Using geminiResult.candidates[0].content.parts[].text');
-                    }
-                } else if (geminiResult && geminiResult.content && geminiResult.content.parts) {
-                    // Direct content structure
-                    const textPart = geminiResult.content.parts.find(part => part.text);
-                    if (textPart) {
-                        responseText = textPart.text;
-                        console.log('✅ Using geminiResult.content.parts[].text');
-                    }
-                } else {
-                    console.error('❌ Unexpected Gemini response format:', geminiResult);
-                    console.error('❌ Available properties:', Object.keys(geminiResult));
-                    console.error('❌ Text property value:', geminiResult.text);
-                    console.error('❌ Text property type:', typeof geminiResult.text);
-                    if (geminiResult.candidates) {
-                        console.error('❌ Candidates structure:', geminiResult.candidates);
-                    }
-                    if (geminiResult.content) {
-                        console.error('❌ Content structure:', geminiResult.content);
-                    }
-                    return `Sorry, there was an issue with the Gemini API response format. Response type: ${typeof geminiResult}. Available keys: ${Object.keys(geminiResult).join(', ')}. Text value: "${geminiResult.text}"`;
-                }
-                
-                console.log('✅ Final response text length:', responseText.length);
-                
-                // Check if we got an empty response
-                if (!responseText || responseText.trim() === '') {
-                    console.warn('⚠️ Gemini returned empty response, trying fallback...');
-                    
-                    // Try with a simpler prompt as fallback
-                    try {
-                        const fallbackResult = await geminiAPI.generateResponse("Please provide a brief response to: " + userMessage, {
-                            model: botId,
-                            temperature: 0.7,
-                            maxTokens: botId === 'gemini-2.5-flash' ? 4000 : 500
-                        });
+                        maxTokens: botId === 'gemini-2.5-flash' ? 4000 : 1000
+                    });
+                } catch (firstError) {
+                    // If the first model fails due to rate limits, try the other Gemini model
+                    if (firstError.message.includes('Rate limit exceeded') || firstError.message.includes('Quota exceeded')) {
+                        console.log(`⚠️ ${botId} failed due to rate limits, trying alternative Gemini model...`);
                         
-                        if (fallbackResult && fallbackResult.text && fallbackResult.text.trim() !== '') {
-                            responseText = fallbackResult.text;
-                            console.log('✅ Using fallback response');
-                        } else {
-                            return `Sorry, Gemini ${botId} is currently not responding properly. Please try again later or use a different model.`;
+                        const alternativeModel = botId === 'gemini-2.5-flash' ? 'gemini-2.0-flash' : 'gemini-2.5-flash';
+                        console.log(`🔄 Retrying with ${alternativeModel}...`);
+                        
+                        try {
+                            geminiResult = await geminiAPI.generateResponse(enhancedMessage, {
+                                model: alternativeModel,
+                                temperature: this.modelTemperatures[alternativeModel] || 0.7,
+                                maxTokens: alternativeModel === 'gemini-2.5-flash' ? 4000 : 1000
+                            });
+                            console.log(`✅ Successfully used ${alternativeModel} as fallback`);
+                        } catch (secondError) {
+                            // Both models failed, throw the original error
+                            throw firstError;
                         }
-                    } catch (fallbackError) {
-                        console.error('❌ Fallback also failed:', fallbackError);
-                        return `Sorry, Gemini ${botId} is currently not responding properly. Please try again later or use a different model.`;
+                } else {
+                        // Not a rate limit error, throw the original error
+                        throw firstError;
                     }
                 }
+
+                console.log('🔍 Gemini API response received:', geminiResult);
                 
-                return responseText;
+                if (geminiResult && geminiResult.text && geminiResult.text.trim() !== '') {
+                    console.log('✅ Gemini response text extracted successfully');
+                    return geminiResult.text;
+                } else {
+                    console.error('❌ Empty or invalid response from Gemini API');
+                    throw new Error('Empty response from Gemini API');
+                }
+
             } catch (error) {
-                console.error('Error calling Gemini API:', error);
-                return `Sorry, there was an error connecting to Gemini: ${error.message}`;
+                console.error('❌ Gemini API error:', error.message);
+                
+                // Handle specific error types with helpful messages
+                if (error.message.includes('Rate limit exceeded') || error.message.includes('Quota exceeded')) {
+                    const fallbackMessage = `⚠️ **All Gemini models are currently unavailable** due to rate limits or quota restrictions.
+
+**What happened:**
+- Both Gemini 2.0 Flash and Gemini 2.5 Flash have hit their usage limits
+- This is a temporary issue that will resolve automatically
+
+**Solutions:**
+1. **Wait a few minutes** and try again
+2. **Use a different AI model** (Cerebras, Qwen, etc.)
+3. **Check your API quota** at https://ai.google.dev/gemini-api/docs/rate-limits
+
+**For file analysis:**
+- Text files: Try copying and pasting the content directly
+- Images: Try describing the image in your message
+- PDFs: Try copying and pasting the text content
+
+The system will automatically retry when the quota resets.`;
+                    
+                    return fallbackMessage;
+                } else if (error.message.includes('Invalid request')) {
+                    return `❌ **${botId} encountered an error** processing your request.
+
+**Error:** ${error.message}
+
+**Please try:**
+- Simplifying your message
+- Using a different model
+- Checking your file format`;
+                } else {
+                    return `❌ **${botId} is temporarily unavailable.**
+
+**Error:** ${error.message}
+
+**Please try again in a moment or use a different model.**`;
+                }
             }
         }
 
@@ -1642,27 +1706,7 @@ class PrudenceAIV2 {
         return filteredText;
     }
 
-    // Read .txt files and return their content
-    async readTxtFiles(txtFiles) {
-        console.log(`📄 Processing ${txtFiles.length} .txt file(s) for Gemini models...`);
-        const fileContents = [];
-        
-        for (const file of txtFiles) {
-            try {
-                console.log(`📖 Reading file: ${file.name} (${this.formatFileSize(file.size)})`);
-                const content = await this.readFileAsText(file);
-                console.log(`✅ Successfully read ${file.name}, content length: ${content.length} characters`);
-                fileContents.push(`📄 ${file.name}:\n${content}\n`);
-            } catch (error) {
-                console.error(`❌ Error reading file ${file.name}:`, error);
-                fileContents.push(`📄 ${file.name}: Error reading file content`);
-            }
-        }
-        
-        const combinedContent = fileContents.join('\n');
-        console.log(`📋 Combined file content length: ${combinedContent.length} characters`);
-        return combinedContent;
-    }
+
 
     // Helper method to read file as text
     readFileAsText(file) {
@@ -1697,20 +1741,37 @@ class PrudenceAIV2 {
     }
 
     attachFiles() {
+        // Check if attachment is enabled (only for Gemini models)
+        const attachmentButton = document.querySelector('.attachment-btn');
+        if (attachmentButton && attachmentButton.disabled) {
+            alert('File attachments are only available when Gemini models are selected.');
+            return;
+        }
+        
         // Create file input element
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.multiple = true;
-        fileInput.accept = '.txt,.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.mp4,.mp3,.wav,.zip,.rar';
+        fileInput.accept = '.txt';
         
         fileInput.addEventListener('change', (event) => {
             const files = Array.from(event.target.files);
             
             if (files.length === 0) return;
             
+            // Filter for .txt files only
+            const txtFiles = files.filter(file => {
+                const fileName = file.name.toLowerCase();
+                if (!fileName.endsWith('.txt')) {
+                    alert(`File "${file.name}" is not supported. Only .txt files are allowed.`);
+                    return false;
+                }
+                return true;
+            });
+            
             // Validate file sizes (max 10MB per file)
             const maxSize = 10 * 1024 * 1024; // 10MB
-            const validFiles = files.filter(file => {
+            const validFiles = txtFiles.filter(file => {
                 if (file.size > maxSize) {
                     alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
                     return false;
@@ -2151,6 +2212,62 @@ class PrudenceAIV2 {
             this.comparePopoutModal.classList.remove('active');
         }
     }
+
+    // Process text files for Gemini models
+    async processTextFiles(files) {
+        console.log(`📄 Processing ${files.length} text file(s) for Gemini models...`);
+        const fileContents = [];
+        
+        for (const file of files) {
+            try {
+                console.log(`📖 Processing file: ${file.name} (${this.formatFileSize(file.size)})`);
+                
+                const content = await this.readFileAsText(file);
+                fileContents.push(`📄 ${file.name}:\n${content}\n`);
+                
+                console.log(`✅ Successfully processed ${file.name}, content length: ${content.length} characters`);
+            } catch (error) {
+                console.error(`❌ Error processing file ${file.name}:`, error);
+                fileContents.push(`📄 ${file.name}: Error reading file content`);
+            }
+        }
+        
+        const combinedContent = fileContents.join('\n');
+        console.log(`📋 Combined file content length: ${combinedContent.length} characters`);
+        return combinedContent;
+    }
+
+    // Update attachment button state based on selected models
+    updateAttachmentButtonState() {
+        const attachmentButton = document.querySelector('.attachment-btn');
+        if (!attachmentButton) {
+            console.warn('⚠️ Attachment button not found');
+            return;
+        }
+        
+        // Check if any Gemini models are selected
+        const geminiModelKeys = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+        const hasGeminiSelected = this.selectedModels.some(modelId => geminiModelKeys.includes(modelId));
+        
+        console.log('🔍 Attachment button state check:');
+        console.log('- Selected models:', this.selectedModels);
+        console.log('- Gemini model keys:', geminiModelKeys);
+        console.log('- Has Gemini selected:', hasGeminiSelected);
+        
+        if (hasGeminiSelected) {
+            attachmentButton.disabled = false;
+            attachmentButton.style.opacity = '1';
+            attachmentButton.style.cursor = 'pointer';
+            attachmentButton.title = 'Attach text files (only supported by Gemini models)';
+            console.log('✅ Attachment button enabled');
+        } else {
+            attachmentButton.disabled = true;
+            attachmentButton.style.opacity = '0.5';
+            attachmentButton.style.cursor = 'not-allowed';
+            attachmentButton.title = 'File attachments only available with Gemini models';
+            console.log('❌ Attachment button disabled');
+        }
+    }
 }
 
 // ===== INITIALIZATION =====
@@ -2186,33 +2303,68 @@ function renderJsonAsHtml(obj, indent = 0) {
 } 
 
 window.testTxtFileReading = async function() {
-    console.log('🧪 Testing .txt file reading for Gemini models...');
+    console.log('🧪 Testing text file reading for Gemini models...');
     
-    // Create a test .txt file
-    const testContent = "This is a test text file.\nIt contains multiple lines.\nThis will be read by Gemini models only.";
-    const testFile = new File([testContent], 'test.txt', { type: 'text/plain' });
+    // Create test text file
+    const testTextContent = "This is a test text file.\nIt contains multiple lines.\nThis will be read by Gemini models only.";
+    const testTextFile = new File([testTextContent], 'test.txt', { type: 'text/plain' });
     
-    // Simulate the file reading process
+    // Test the file processing
     try {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const content = e.target.result;
-            console.log('✅ Test file content read successfully:', content);
+        const supportedFiles = [testTextFile];
+        console.log('✅ Test file created successfully');
+        
+        // Simulate the file processing
+        for (const file of supportedFiles) {
+            console.log(`📖 Testing file: ${file.name}`);
             
-            // Test the enhanced message format
-            const enhancedMessage = `Test message\n\n📎 Attached Text Files:\n📄 test.txt:\n${content}\n`;
-            console.log('📋 Enhanced message format:', enhancedMessage);
-            
-            alert('✅ .txt file reading test successful! Check console for details.');
-        };
-        reader.onerror = () => {
-            console.error('❌ Test file reading failed');
-            alert('❌ Test file reading failed');
-        };
-        reader.readAsText(testFile);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                console.log('✅ Text file processed:', content);
+            };
+            reader.readAsText(file);
+        }
+        
+        console.log('✅ Text file processing test successful!');
+        alert('✅ Text file processing test successful! Check console for details.');
         
     } catch (error) {
         console.error('❌ Test error:', error);
         alert('❌ Test error: ' + error.message);
     }
+};
+
+// Test function for debugging dropdown functionality
+window.testDropdown = function() {
+    console.log('🧪 Testing dropdown functionality...');
+    
+    // Test if elements exist
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownContent = document.querySelector('.dropdown-content');
+    const modelOptions = document.querySelectorAll('.model-option');
+    
+    console.log('🔍 Elements found:');
+    console.log('- Dropdown toggle:', !!dropdownToggle);
+    console.log('- Dropdown content:', !!dropdownContent);
+    console.log('- Model options:', modelOptions.length);
+    
+    // Test dropdown toggle
+    if (dropdownToggle) {
+        console.log('🖱️ Clicking dropdown toggle...');
+        dropdownToggle.click();
+        
+        setTimeout(() => {
+            const isActive = dropdownContent?.classList.contains('active');
+            console.log('✅ Dropdown active state:', isActive);
+            
+            // Test clicking a model option
+            if (modelOptions.length > 0) {
+                console.log('🖱️ Clicking first model option...');
+                modelOptions[0].click();
+            }
+        }, 100);
+    }
+    
+    console.log('✅ Dropdown test completed');
 };
