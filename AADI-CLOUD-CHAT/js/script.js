@@ -110,6 +110,71 @@ window.checkGeminiModels = async function() {
     }
 };
 
+window.testAuthModal = function() {
+    console.log('🧪 Testing auth modal functionality...');
+    if (window.prudenceAI) {
+        console.log('✅ PrudenceAI instance found');
+        console.log('🔍 Auth modal element:', !!window.prudenceAI.authModal);
+        console.log('🔍 Modal submit button:', !!window.prudenceAI.modalSubmit);
+        console.log('🔍 Modal close button:', !!window.prudenceAI.modalClose);
+        console.log('🔍 Modal toggle button:', !!window.prudenceAI.toggleModalAuth);
+        
+        // Test showing the modal
+        window.prudenceAI.showAuthModal(true);
+        
+        // Test if modal is visible
+        setTimeout(() => {
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                console.log('🔍 Modal display style:', modal.style.display);
+                console.log('🔍 Modal computed style:', window.getComputedStyle(modal).display);
+                console.log('🔍 Modal is visible:', modal.style.display !== 'none');
+            }
+        }, 100);
+    } else {
+        console.error('❌ PrudenceAI instance not found');
+    }
+};
+
+window.testModalButtons = function() {
+    console.log('🧪 Testing modal button functionality...');
+    
+    // Check if modal elements exist
+    const modal = document.getElementById('authModal');
+    const submitBtn = document.getElementById('modalSubmit');
+    const closeBtn = document.getElementById('modalClose');
+    const toggleBtn = document.getElementById('toggleModalAuth');
+    
+    console.log('🔍 Modal elements found:');
+    console.log('- Modal:', !!modal);
+    console.log('- Submit button:', !!submitBtn);
+    console.log('- Close button:', !!closeBtn);
+    console.log('- Toggle button:', !!toggleBtn);
+    
+    if (modal) {
+        console.log('🔍 Modal display style:', modal.style.display);
+        console.log('🔍 Modal computed display:', window.getComputedStyle(modal).display);
+    }
+    
+    // Test clicking the submit button
+    if (submitBtn) {
+        console.log('🔍 Testing submit button click...');
+        submitBtn.click();
+    }
+    
+    // Test clicking the close button
+    if (closeBtn) {
+        console.log('🔍 Testing close button click...');
+        closeBtn.click();
+    }
+    
+    // Test clicking the toggle button
+    if (toggleBtn) {
+        console.log('🔍 Testing toggle button click...');
+        toggleBtn.click();
+    }
+};
+
 // Firebase initialization check
 const checkFirebaseInit = () => {
     try {
@@ -139,7 +204,7 @@ class PrudenceAIV2 {
         this.firebaseConfigured = checkFirebaseInit();
         
         // Configuration
-        this.appName = 'Prudence AI v2';
+        this.appName = 'AADI CLOUD';
         this.maxChatHistory = 20;
         this.maxMessageLength = 1000;
         this.maxAiModels = 3;
@@ -151,8 +216,11 @@ class PrudenceAIV2 {
         this.renderChatHistory();
         this.startNewChat();
         this.updateBotSelection();
-        this.hideChatArea();
+        
+        // Check authentication state first
+        console.log('🔍 Checking authentication state...');
         this.checkAuthState();
+        
         this.loadFaqsFromFirebase();
     }
 
@@ -196,6 +264,16 @@ class PrudenceAIV2 {
         this.modalClose = document.getElementById('modalClose');
         this.toggleModalAuth = document.getElementById('toggleModalAuth');
         
+        // Debug auth elements
+        console.log('🔍 Auth elements found:');
+        console.log('authModal:', !!this.authModal);
+        console.log('modalTitle:', !!this.modalTitle);
+        console.log('modalEmail:', !!this.modalEmail);
+        console.log('modalPassword:', !!this.modalPassword);
+        console.log('modalSubmit:', !!this.modalSubmit);
+        console.log('modalClose:', !!this.modalClose);
+        console.log('toggleModalAuth:', !!this.toggleModalAuth);
+        
         // Input elements
         this.attachmentBtn = document.getElementById('attachmentBtn');
         this.optimizeBtn = document.getElementById('optimizeBtn');
@@ -231,7 +309,6 @@ class PrudenceAIV2 {
                 </div>
                 <div class="model-option-info">
                     <div class="model-option-name">${model.name}</div>
-                    <div class="model-option-desc">${model.description}</div>
                 </div>
                 <div class="model-option-checkbox">
                     <i class="fas fa-check"></i>
@@ -312,13 +389,31 @@ class PrudenceAIV2 {
 
         // Modal events
         if (this.modalSubmit) {
-            this.modalSubmit.addEventListener('click', () => this.handleAuthSubmit());
+            console.log('🔍 Adding modal submit event listener');
+            this.modalSubmit.addEventListener('click', () => {
+                console.log('🔐 Modal submit button clicked');
+                this.handleAuthSubmit();
+            });
+        } else {
+            console.error('❌ Modal submit button not found');
         }
         if (this.modalClose) {
-            this.modalClose.addEventListener('click', () => this.hideAuthModal());
+            console.log('🔍 Adding modal close event listener');
+            this.modalClose.addEventListener('click', () => {
+                console.log('🔐 Modal close button clicked');
+                this.hideAuthModal();
+            });
+        } else {
+            console.error('❌ Modal close button not found');
         }
         if (this.toggleModalAuth) {
-            this.toggleModalAuth.addEventListener('click', () => this.toggleAuthMode());
+            console.log('🔍 Adding modal toggle event listener');
+            this.toggleModalAuth.addEventListener('click', () => {
+                console.log('🔐 Modal toggle button clicked');
+                this.toggleAuthMode();
+            });
+        } else {
+            console.error('❌ Modal toggle button not found');
         }
 
         // Popout modal events
@@ -481,6 +576,11 @@ class PrudenceAIV2 {
             if (mainContent) {
                 mainContent.classList.add('with-right-sidebar');
             }
+            
+            // Auto-scroll to bottom when right sidebar opens
+            setTimeout(() => {
+                this.scrollToBottom();
+            }, 100);
         }
     }
 
@@ -525,8 +625,8 @@ class PrudenceAIV2 {
             this.chatMessages.innerHTML = `
                 <div class="message ai-message" data-welcome="true">
                     <div class="message-content">
-                        <strong>🤖 Prudence AI v2:</strong>
-                        <div>Welcome to Prudence AI v2</div>
+                        <strong>🤖 AADI CLOUD:</strong>
+                        <div>Welcome to AADI CLOUD</div>
                         <div>Start a conversation with your AI assistant. Select different models or use ensemble mode to see responses from multiple AIs.</div>
                     </div>
                     <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
@@ -546,6 +646,11 @@ class PrudenceAIV2 {
         if (this.compareToggle) {
             this.compareToggle.classList.add('active');
         }
+        
+        // Auto-scroll to welcome message
+        setTimeout(() => {
+            this.scrollToBottom();
+        }, 100);
     }
 
     sendMessage() {
@@ -584,6 +689,9 @@ class PrudenceAIV2 {
         this.clearAttachments();
         this.sendButton.disabled = true;
 
+        // Auto-scroll immediately when user sends message
+        this.scrollToBottom();
+        
         this.handleCompareMode(messageContent);
     }
 
@@ -615,6 +723,9 @@ class PrudenceAIV2 {
                     <div class="typing-dot"></div>
                 </div>
             `;
+            
+            // Auto-scroll when typing indicator appears
+            this.scrollToBottom();
             
             // Generate response
             setTimeout(async () => {
@@ -656,6 +767,11 @@ class PrudenceAIV2 {
                         this.messages,
                         this.saveChatHistory.bind(this)
                     );
+                    
+                    // Auto-scroll after ensemble button is created
+                    setTimeout(() => {
+                        this.scrollToBottom();
+                    }, 100);
                 }
                 
                 // Scroll to bottom
@@ -763,6 +879,21 @@ class PrudenceAIV2 {
     }
 
     scrollToBottom() {
+        // Scroll main chat area
+        setTimeout(() => {
+            if (this.chatMessages) {
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+        }, 50);
+        
+        // Scroll individual responses area
+        setTimeout(() => {
+            if (this.individualResponses) {
+                this.individualResponses.scrollTop = this.individualResponses.scrollHeight;
+            }
+        }, 100);
+        
+        // Additional scroll after content is fully rendered
         setTimeout(() => {
             if (this.chatMessages) {
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
@@ -770,7 +901,7 @@ class PrudenceAIV2 {
             if (this.individualResponses) {
                 this.individualResponses.scrollTop = this.individualResponses.scrollHeight;
             }
-        }, 100);
+        }, 300);
     }
 
     renderModelIcon(icon) {
@@ -784,22 +915,114 @@ class PrudenceAIV2 {
     // ===== AUTHENTICATION METHODS =====
 
     checkAuthState() {
+        console.log('🔍 Starting auth state check...');
         checkAuthState((user) => {
+            console.log('🔍 Auth state callback received:', user ? 'User logged in' : 'No user');
             if (user) {
+                console.log('✅ User is authenticated:', user.email);
                 this.loadChatHistoryFromFirebase(user.uid);
                 this.showChatArea();
             } else {
+                console.log('❌ No user authenticated, showing login screen');
                 this.hideChatArea();
             }
         });
     }
 
     showAuthModal(isLogin = true) {
-        if (this.authModal) {
-            this.authModal.style.display = 'block';
-            this.modalTitle.textContent = isLogin ? 'Login' : 'Sign Up';
-            this.modalSubmit.textContent = isLogin ? 'Login' : 'Sign Up';
+        console.log('🔐 Showing auth modal:', isLogin ? 'Login' : 'Sign Up');
+        
+        // Remove any existing modal
+        const existingModal = document.querySelector('.dynamic-auth-modal');
+        if (existingModal) {
+            existingModal.remove();
         }
+        
+        // Create modal dynamically
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'dynamic-auth-modal';
+        modalOverlay.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(0, 0, 0, 0.7) !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            backdrop-filter: blur(5px) !important;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white !important;
+            padding: 30px !important;
+            border-radius: 12px !important;
+            width: 90% !important;
+            max-width: 400px !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+            position: relative !important;
+        `;
+        
+        modalContent.innerHTML = `
+            <h2 style="margin: 0 0 20px 0; color: #333; font-size: 24px;">${isLogin ? 'Login' : 'Sign Up'}</h2>
+            <input type="email" id="dynamicEmail" placeholder="Email" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; box-sizing: border-box;">
+            <input type="password" id="dynamicPassword" placeholder="Password" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; box-sizing: border-box;">
+            <button id="dynamicSubmit" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 10px 0;">${isLogin ? 'Login' : 'Sign Up'}</button>
+            <button id="dynamicClose" style="width: 100%; padding: 12px; background: #ccc; color: black; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 10px 0;">Close</button>
+            <div id="dynamicToggle" style="margin-top: 15px; color: #667eea; cursor: pointer; text-align: center; font-size: 14px;">${isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}</div>
+        `;
+        
+        modalOverlay.appendChild(modalContent);
+        document.body.appendChild(modalOverlay);
+        
+        // Add event listeners
+        const submitBtn = document.getElementById('dynamicSubmit');
+        const closeBtn = document.getElementById('dynamicClose');
+        const toggleBtn = document.getElementById('dynamicToggle');
+        const emailInput = document.getElementById('dynamicEmail');
+        const passwordInput = document.getElementById('dynamicPassword');
+        
+        submitBtn.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!email || !password) {
+                alert("Email and password are required");
+                return;
+            }
+            
+            if (isLogin) {
+                this.loginUser(email, password);
+            } else {
+                this.signUpUser(email, password);
+            }
+            
+            modalOverlay.remove();
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modalOverlay.remove();
+        });
+        
+        toggleBtn.addEventListener('click', () => {
+            modalOverlay.remove();
+            this.showAuthModal(!isLogin);
+        });
+        
+        // Close on overlay click
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.remove();
+            }
+        });
+        
+        // Focus on email input
+        emailInput.focus();
+        
+        console.log('✅ Dynamic auth modal created and displayed');
     }
 
     hideAuthModal() {
@@ -811,14 +1034,20 @@ class PrudenceAIV2 {
     }
 
     handleAuthSubmit() {
+        console.log('🔐 Auth submit button clicked');
         const email = this.modalEmail.value.trim();
         const password = this.modalPassword.value.trim();
+        
+        console.log('🔍 Form values:', { email: email ? 'provided' : 'empty', password: password ? 'provided' : 'empty' });
+        
         if (!email || !password) {
             alert("Email and password are required");
             return;
         }
         
         const isLogin = this.modalTitle.textContent === 'Login';
+        console.log('🔍 Auth mode:', isLogin ? 'Login' : 'Sign Up');
+        
         if (isLogin) {
             this.loginUser(email, password);
         } else {
@@ -827,41 +1056,48 @@ class PrudenceAIV2 {
     }
 
     toggleAuthMode() {
+        console.log('🔐 Toggling auth mode');
         const isLogin = this.modalTitle.textContent === 'Login';
+        console.log('🔍 Current mode:', isLogin ? 'Login' : 'Sign Up');
         this.showAuthModal(!isLogin);
     }
 
     loginUser(email, password) {
+        console.log('🔐 Attempting login for:', email);
         loginUser(email, password,
             (userCredential) => {
-                console.log("User signed in with UID:", userCredential.user.uid);
+                console.log("✅ User signed in with UID:", userCredential.user.uid);
                 this.addMessage(`Welcome ${email.split('@')[0]}! You have successfully logged in.`, 'ai');
                 this.hideAuthModal();
+                this.showChatArea();
             },
             (error) => {
-                console.error("Error signing in:", error.code, error.message);
+                console.error("❌ Error signing in:", error.code, error.message);
                 alert(`Error: ${error.message}`);
             }
         );
     }
 
     signUpUser(email, password) {
+        console.log('🔐 Attempting signup for:', email);
         signUpUser(email, password,
             (userCredential) => {
                 const userId = userCredential.user.uid;
+                console.log("✅ User signed up with UID:", userId);
                 set(ref(this.database, 'users/' + userId), { email: email })
                     .then(() => {
-                        console.log("User signed up and data saved with UID:", userId);
+                        console.log("✅ User data saved to Firebase");
                         this.addMessage(`Welcome ${email.split('@')[0]}! You have successfully signed up.`, 'ai');
-                        this.loginUser(email, password);
+                        this.hideAuthModal();
+                        this.showChatArea();
                     })
                     .catch((error) => {
-                        console.error("Error saving data:", error.message);
+                        console.error("❌ Error saving data:", error.message);
                         alert(`Error: ${error.message}`);
                     });
             },
             (error) => {
-                console.error("Error signing up:", error.code, error.message);
+                console.error("❌ Error signing up:", error.code, error.message);
                 alert(`Error: ${error.message}`);
             }
         );
@@ -885,6 +1121,11 @@ class PrudenceAIV2 {
         this.messageInput.style.display = 'inline';
         this.sendButton.style.display = 'flex';
         
+        // Show logout button when user is logged in
+        if (this.logoutBtn) {
+            this.logoutBtn.style.display = 'block';
+        }
+        
         if (!this.currentChatId || this.messages.length === 0) {
             this.startNewChat();
         }
@@ -895,18 +1136,39 @@ class PrudenceAIV2 {
         this.messageInput.style.display = 'none';
         this.sendButton.style.display = 'none';
         
+        // Hide logout button when user is logged out
+        if (this.logoutBtn) {
+            this.logoutBtn.style.display = 'none';
+        }
+        
         this.chatMessages.innerHTML = `
             <div class="login-message">
                 <div class="login-message-content">
-                    <h2>🔐 Welcome to Prudence AI v2</h2>
+                    <h2>🔐 Welcome to AADI CLOUD</h2>
                     <p>Please login or signup to start chatting with our AI models.</p>
                     <div class="login-actions">
-                        <button class="login-action-btn" onclick="document.querySelector('.login-btn').click()">Login</button>
-                        <button class="login-action-btn" onclick="document.querySelector('.signup-btn').click()">Sign Up</button>
+                        <button class="login-action-btn" id="loginBtn">Login</button>
+                        <button class="login-action-btn" id="signupBtn">Sign Up</button>
                     </div>
                 </div>
             </div>
         `;
+        
+        // Add event listeners to the buttons
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                this.showAuthModal(true);
+            });
+        }
+        
+        if (signupBtn) {
+            signupBtn.addEventListener('click', () => {
+                this.showAuthModal(false);
+            });
+        }
     }
 
     // ===== FIREBASE METHODS =====
