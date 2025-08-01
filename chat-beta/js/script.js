@@ -215,7 +215,7 @@ class PrudenceAIV2 {
         this.initializeUI();
         this.renderChatHistory();
         this.startNewChat();
-        this.updateBotSelection();
+        this.updateSelectedModelsDisplay();
         
         // Check authentication state first
         console.log('🔍 Checking authentication state...');
@@ -981,6 +981,7 @@ class PrudenceAIV2 {
             console.log('🔍 Auth state callback received:', user ? 'User logged in' : 'No user');
             if (user) {
                 console.log('✅ User is authenticated:', user.email);
+                console.log('🔍 About to load chat history from Firebase for user:', user.uid);
                 this.loadChatHistoryFromFirebase(user.uid);
                 this.showChatArea();
             } else {
@@ -1131,6 +1132,9 @@ class PrudenceAIV2 {
                 console.log("✅ User signed in with UID:", userCredential.user.uid);
                 this.addMessage(`Welcome ${email.split('@')[0]}! You have successfully logged in.`, 'ai');
                 this.hideAuthModal();
+                
+                // Load chat history from Firebase after successful login
+                this.loadChatHistoryFromFirebase(userCredential.user.uid);
                 this.showChatArea();
             },
             (error) => {
@@ -1151,6 +1155,9 @@ class PrudenceAIV2 {
                         console.log("✅ User data saved to Firebase");
                         this.addMessage(`Welcome ${email.split('@')[0]}! You have successfully signed up.`, 'ai');
                         this.hideAuthModal();
+                        
+                        // Load chat history from Firebase after successful signup
+                        this.loadChatHistoryFromFirebase(userId);
                         this.showChatArea();
                     })
                     .catch((error) => {
@@ -1169,6 +1176,16 @@ class PrudenceAIV2 {
         logoutUser(
             () => {
                 console.log("User signed out");
+                
+                // Clear current chat data
+                this.messages = [];
+                this.chatHistory = [];
+                this.currentChatId = null;
+                
+                // Clear localStorage
+                localStorage.removeItem('prudence-ai-chats');
+                
+                // Show login screen
                 this.hideChatArea();
             },
             (error) => {
@@ -1236,19 +1253,30 @@ class PrudenceAIV2 {
     // ===== FIREBASE METHODS =====
 
     loadChatHistoryFromFirebase(userId) {
+        console.log('📥 Loading chat history from Firebase for user:', userId);
+        
         get(ref(this.database, `users/${userId}/chatHistory`))
             .then((snapshot) => {
                 if (snapshot.exists()) {
                     this.chatHistory = snapshot.val();
-                    this.renderChatHistory();
+                    console.log('✅ Chat history loaded from Firebase:', this.chatHistory.length, 'chats');
+                    
+                    // Add a small delay to ensure DOM elements are ready
+                    setTimeout(() => {
+                        this.renderChatHistory();
+                    }, 100);
                 } else {
-                    // Try to load from localStorage as fallback
-                    this.loadFromLocalStorage();
+                    console.log('📭 No chat history found in Firebase, starting fresh');
+                    this.chatHistory = [];
+                    setTimeout(() => {
+                        this.renderChatHistory();
+                    }, 100);
                 }
             })
             .catch((error) => {
-                console.error("Error loading chat history from Firebase:", error);
+                console.error("❌ Error loading chat history from Firebase:", error);
                 // Try to load from localStorage as fallback
+                console.log('🔄 Falling back to localStorage...');
                 this.loadFromLocalStorage();
             });
     }
@@ -1262,11 +1290,17 @@ class PrudenceAIV2 {
             } else {
                 this.chatHistory = [];
             }
-            this.renderChatHistory();
+            
+            // Add a small delay to ensure DOM elements are ready
+            setTimeout(() => {
+                this.renderChatHistory();
+            }, 100);
         } catch (error) {
             console.error("Error loading chat history from localStorage:", error);
             this.chatHistory = [];
-            this.renderChatHistory();
+            setTimeout(() => {
+                this.renderChatHistory();
+            }, 100);
         }
     }
 
@@ -1333,15 +1367,28 @@ class PrudenceAIV2 {
         console.log('🎨 Rendering chat history...', {
             chatHistoryList: !!this.chatHistoryList,
             chatHistoryLength: this.chatHistory.length,
-            currentChatId: this.currentChatId
+            currentChatId: this.currentChatId,
+            chatHistory: this.chatHistory
         });
         
         if (!this.chatHistoryList) {
             console.log('❌ Chat history list element not found');
+            console.log('🔍 Available elements:', {
+                chatMessages: !!this.chatMessages,
+                messageInput: !!this.messageInput,
+                sendButton: !!this.sendButton,
+                newChatButton: !!this.newChatButton
+            });
             return;
         }
         
+        console.log('✅ Chat history list element found, clearing and rendering...');
         this.chatHistoryList.innerHTML = '';
+        
+        if (this.chatHistory.length === 0) {
+            console.log('📭 No chat history to render');
+            return;
+        }
         
         this.chatHistory.forEach((chat, index) => {
             console.log(`📋 Rendering chat ${index}:`, {
