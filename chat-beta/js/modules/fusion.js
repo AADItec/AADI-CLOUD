@@ -8,6 +8,13 @@ export class FusionService {
 
     async generateFusedResponse(userMessage, botResponses, selectedBots, aiModels, grid, compareContainer, formatAnswer, messages, saveChatHistory) {
         try {
+            // Check if Gemini API is configured
+            if (!this.geminiAPI || !this.geminiAPI.isReady()) {
+                console.warn('⚠️ Gemini API not configured, showing fallback response');
+                this.showFallbackResponse(botResponses, grid, formatAnswer, 'Gemini API not configured. Showing individual responses.');
+                return;
+            }
+
             console.log('🔍 Starting fusion process...');
             console.log('📨 User message:', userMessage);
             console.log('🤖 Bot responses:', botResponses);
@@ -44,9 +51,13 @@ export class FusionService {
             
             const fusedResult = await this.geminiAPI.generateResponse(fusionPrompt, {
                 model: 'gemini-2.5-flash',
-                temperature: 0.7,
-                maxTokens: 3000  // Increased token limit for longer responses
+                temperature: 1.0,
+                maxTokens: 13000  // Increased token limit for longer responses
             });
+
+            console.log('🔍 Raw fused result from Gemini:', fusedResult);
+            console.log('🔍 Fused result type:', typeof fusedResult);
+            console.log('🔍 Fused result keys:', Object.keys(fusedResult || {}));
 
             // Process and display response
             const fusedText = this.extractFusedText(fusedResult);
@@ -72,7 +83,18 @@ export class FusionService {
 
         } catch (error) {
             console.error('❌ Error generating fused response:', error);
-            this.showFallbackResponse(botResponses, grid, formatAnswer);
+            
+            // Check if it's a Gemini API configuration issue
+            if (error.message.includes('not configured') || error.message.includes('API key')) {
+                console.warn('⚠️ Gemini API not configured, showing fallback response');
+                this.showFallbackResponse(botResponses, grid, formatAnswer, 'Gemini API not configured. Showing individual responses.');
+            } else if (error.message.includes('Rate limit') || error.message.includes('Quota exceeded')) {
+                console.warn('⚠️ Gemini API rate limit/quota exceeded, showing fallback response');
+                this.showFallbackResponse(botResponses, grid, formatAnswer, 'Gemini API rate limit exceeded. Showing individual responses.');
+            } else {
+                console.error('❌ Unexpected error in fusion:', error);
+                this.showFallbackResponse(botResponses, grid, formatAnswer, 'Fusion failed. Showing individual responses.');
+            }
         }
     }
 
@@ -596,17 +618,26 @@ Create a single, superior response that combines the best elements from all mode
         
         // Check different possible response structures
         let fusedText = '';
-        if (fusedResult.text) {
-            fusedText = fusedResult.text;
-        } else if (fusedResult.response && fusedResult.response.text) {
-            fusedText = fusedResult.response.text;
-        } else if (fusedResult.candidates && fusedResult.candidates[0] && fusedResult.candidates[0].content) {
-            fusedText = fusedResult.candidates[0].content.parts[0].text;
+        
+        // Check for the actual Gemini API response structure
+        if (fusedResult && typeof fusedResult === 'object') {
+            if (fusedResult.text) {
+                fusedText = fusedResult.text;
+            } else if (fusedResult.response && fusedResult.response.text) {
+                fusedText = fusedResult.response.text;
+            } else if (fusedResult.candidates && fusedResult.candidates[0] && fusedResult.candidates[0].content) {
+                fusedText = fusedResult.candidates[0].content.parts[0].text;
+            } else if (fusedResult.content && fusedResult.content.parts && fusedResult.content.parts[0]) {
+                fusedText = fusedResult.content.parts[0].text;
+            } else {
+                console.error('❌ Unexpected response structure:', fusedResult);
+                throw new Error('Unexpected Gemini API response structure');
+            }
         } else if (typeof fusedResult === 'string') {
             fusedText = fusedResult;
         } else {
-            console.error('❌ Unexpected response structure:', fusedResult);
-            throw new Error('Unexpected Gemini API response structure');
+            console.error('❌ Invalid response type:', typeof fusedResult, fusedResult);
+            throw new Error('Invalid response type from Gemini API');
         }
         
         console.log('📄 Extracted fused text:', fusedText);
@@ -665,7 +696,7 @@ Create a single, superior response that combines the best elements from all mode
         }
     }
 
-    showFallbackResponse(botResponses, grid, formatAnswer) {
+    showFallbackResponse(botResponses, grid, formatAnswer, message = 'Fusion failed. Showing individual responses.') {
         const fallbackDiv = document.createElement('div');
         fallbackDiv.className = 'compare-response compare-response-fallback';
         fallbackDiv.style.background = '#fff3cd';
@@ -680,10 +711,10 @@ Create a single, superior response that combines the best elements from all mode
             <div class="compare-response-content">
                 ${botResponses.map(r => formatAnswer(r)).join('<hr style="margin:1em 0;">')}
                 <div style="color: #856404; margin-top: 1rem; font-style: italic;">
-                    Note: Fusion failed, showing concatenated responses instead.
+                    ${message}
                 </div>
             </div>
         `;
         grid.appendChild(fallbackDiv);
     }
-}
+} 
