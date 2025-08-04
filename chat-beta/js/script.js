@@ -1105,65 +1105,65 @@ class PrudenceAIV2 {
     }
 
     formatAnswer(text) {
-        // Clean up malformed code blocks first
-        let formattedText = text;
-    
-        // Headings (H1, H2, H3)
-        formattedText = formattedText
-            .replace(/^### (.*$)/gim, '<h3 class="response-heading h3">$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2 class="response-heading h2">$1</h2>')
-            .replace(/^# (.*$)/gim, '<h1 class="response-heading h1">$1</h1>');
-    
-        // Bold text
-        formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-        // Italic text
-        formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    
-        // Strikethrough
-        formattedText = formattedText.replace(/~~(.*?)~~/g, '<del>$1</del>');
-    
-        // Inline code
-        formattedText = formattedText.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
-    
-        // Blockquotes
-        formattedText = formattedText.replace(/^> (.*$)/gim, '<blockquote class="response-blockquote">$1</blockquote>');
-    
-        // Enhanced code blocks with language detection
-        formattedText = formattedText.replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
-            const language = lang || 'text';
-            return `<pre class="code-block"><code class="language-${language}">${this.escapeHtml(code.trim())}</code></pre>`;
-        });
-    
-        // Lists (unordered and ordered)
-        formattedText = formattedText.replace(/^(\s*)[*+-] (.*$)/gim, (match, spaces, content) => {
-            const indent = spaces.length / 2;
-            return `<div class="list-item" style="margin-left: ${indent * 20}px"><span class="list-bullet">•</span> ${content}</div>`;
-        });
-        formattedText = formattedText.replace(/^(\s*)\d+\. (.*$)/gim, (match, spaces, content) => {
-            const indent = spaces.length / 2;
-            const number = match.match(/\d+/)[0];
-            return `<div class="list-item numbered" style="margin-left: ${indent * 20}px"><span class="list-number">${number}.</span> ${content}</div>`;
-        });
-    
-        // Links
-        formattedText = formattedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="response-link">$1</a>');
-    
-        // Paragraphs and line breaks
-        formattedText = formattedText
-            .replace(/\n\n/g, '</p><p class="response-paragraph">')
-            .replace(/\n/g, '<br>');
-    
-        // Wrap in paragraph if not already wrapped
-        if (!formattedText.startsWith('<h') && !formattedText.startsWith('<p') && !formattedText.startsWith('<div') && !formattedText.startsWith('<pre')) {
-            formattedText = `<p class="response-paragraph">${formattedText}</p>`;
-        }
-    
-        // Clean up empty paragraphs
-        formattedText = formattedText.replace(/<p class="response-paragraph"><\/p>/g, '');
-    
-        return formattedText;
+    // If marked.js is available, use it for full Markdown parsing
+    if (typeof marked !== 'undefined') {
+        return `<div class="formatted-response">${marked.parse(text)}</div>`;
     }
+
+    // Fallback if marked.js is not available
+    let formattedText = text;
+
+    // Headings
+    formattedText = formattedText
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+    // Bold, Italic, Strikethrough
+    formattedText = formattedText
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+    // Inline Code
+    formattedText = formattedText.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+
+    // Blockquotes
+    formattedText = formattedText.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+    // Code blocks
+    formattedText = formattedText.replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
+        const language = lang || 'text';
+        return `<pre><code class="language-${language}">${this.escapeHtml(code.trim())}</code></pre>`;
+    });
+
+    // Lists (Unordered)
+    formattedText = formattedText.replace(/(?:^|\n)(\s*)[*+-] (.*)/g, (match, spaces, content) => {
+        return `<ul><li>${content}</li></ul>`;
+    });
+    // Lists (Ordered)
+    formattedText = formattedText.replace(/(?:^|\n)(\s*)(\d+)\. (.*)/g, (match, spaces, number, content) => {
+        return `<ol><li>${content}</li></ol>`;
+    });
+
+    // Merge consecutive list tags
+    formattedText = formattedText
+        .replace(/<\/ul>\s*<ul>/g, '') // merge <ul>
+        .replace(/<\/ol>\s*<ol>/g, ''); // merge <ol>
+
+    // Paragraphs and line breaks
+    formattedText = formattedText
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+
+    // Wrap if no outer element
+    if (!formattedText.startsWith('<') && !formattedText.endsWith('>')) {
+        formattedText = `<p>${formattedText}</p>`;
+    }
+
+    return `<div class="formatted-response">${formattedText}</div>`;
+}
+
 
     escapeHtml(text) {
         const div = document.createElement('div');
