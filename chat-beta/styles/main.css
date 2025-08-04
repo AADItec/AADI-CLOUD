@@ -2269,6 +2269,71 @@ body.dark-theme .code-block code {
     min-width: 20px;
 }
 
+
+
+.formatted-response ul,
+.formatted-response ol {
+  margin: 0 0 1em 1.5em;
+  padding-left: 1em;
+}
+
+.formatted-response li {
+  margin-bottom: 0.5em;
+}
+
+/* Add spacing around formatted responses */
+.formatted-response {
+  padding: 8px 0;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* Space between paragraphs */
+.formatted-response p {
+  margin-bottom: 1em;
+}
+
+/* Spacing for unordered and ordered lists */
+.formatted-response ul,
+.formatted-response ol {
+  margin: 0 0 1em 1.5em;
+  padding-left: 1em;
+}
+
+/* Space between list items */
+.formatted-response li {
+  margin-bottom: 0.5em;
+}
+
+/* Style blockquotes */
+.formatted-response blockquote {
+  border-left: 4px solid #ccc;
+  padding-left: 12px;
+  margin: 1em 0;
+  color: #555;
+  font-style: italic;
+}
+
+/* Code block styling */
+.formatted-response pre {
+  background: #f8f8f8;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+
+/* Inline code */
+.formatted-response code.inline-code {
+  background: #eee;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+
+
+
 body.dark-theme .list-bullet,
 body.dark-theme .list-number {
     color: #667eea;
