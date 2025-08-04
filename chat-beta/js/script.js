@@ -576,33 +576,142 @@ class PrudenceAIV2 {
 
     // Right Sidebar Methods
     initializeRightSidebar() {
-        // Initialize resize functionality
-        const resizeHandle = this.rightSidebar?.querySelector('.resize-handle');
+        console.log('🔍 Initializing right sidebar resize functionality...');
+        
+        // Remove any existing event listeners first
+        this.removeResizeEventListeners();
+        
+        // Initialize resize functionality with a more robust approach
+        this.setupResizeFunctionality();
+        
+        // Load saved width on initialization
+        this.loadSavedWidth();
+    }
+    
+    removeResizeEventListeners() {
+        // Remove existing event listeners if any
+        const resizeHandle = document.querySelector('#resize-handle');
         if (resizeHandle) {
-            let isResizing = false;
-            let startX, startWidth;
-            
-            resizeHandle.addEventListener('mousedown', (e) => {
-                isResizing = true;
-                startX = e.clientX;
-                startWidth = this.rightSidebar.offsetWidth;
-                document.body.style.cursor = 'col-resize';
-                e.preventDefault();
+            const newResizeHandle = resizeHandle.cloneNode(true);
+            resizeHandle.parentNode.replaceChild(newResizeHandle, resizeHandle);
+        }
+    }
+    
+    setupResizeFunctionality() {
+        let isResizing = false;
+        let startX, startWidth;
+        
+        // Test if resize handle exists and is clickable
+        const resizeHandle = document.querySelector('#resize-handle');
+        if (resizeHandle) {
+            console.log('✅ Resize handle found:', resizeHandle);
+            console.log('🔍 Resize handle styles:', {
+                display: window.getComputedStyle(resizeHandle).display,
+                visibility: window.getComputedStyle(resizeHandle).visibility,
+                opacity: window.getComputedStyle(resizeHandle).opacity,
+                cursor: window.getComputedStyle(resizeHandle).cursor,
+                pointerEvents: window.getComputedStyle(resizeHandle).pointerEvents
             });
             
-            document.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
+            // Add a simple click test
+            resizeHandle.addEventListener('click', (e) => {
+                console.log('✅ Resize handle clicked!');
+                e.stopPropagation();
+            });
+        } else {
+            console.error('❌ Resize handle not found!');
+        }
+        
+        // Use event delegation for better reliability
+        document.addEventListener('mousedown', (e) => {
+            const resizeHandle = e.target.closest('#resize-handle');
+            if (!resizeHandle) return;
+            
+            console.log('🖱️ Mouse down on resize handle');
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = this.rightSidebar.offsetWidth;
+            
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            resizeHandle.style.transform = 'scale(1.1)';
+            
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            
+            const deltaX = startX - e.clientX;
+            const newWidth = startWidth + deltaX;
+            
+            // Constrain width between 300px and 800px
+            if (newWidth >= 300 && newWidth <= 800) {
+                this.rightSidebar.style.width = newWidth + 'px';
                 
-                const width = startWidth - (e.clientX - startX);
-                if (width > 300 && width < 800) {
-                    this.rightSidebar.style.width = width + 'px';
+                // Update main content margin and width
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent && this.rightSidebar.classList.contains('open')) {
+                    mainContent.style.marginRight = newWidth + 'px';
+                    mainContent.style.width = `calc(100% - ${newWidth}px)`;
+                    console.log('📏 Updated main content - width:', newWidth, 'marginRight:', newWidth);
                 }
-            });
-            
-            document.addEventListener('mouseup', () => {
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                console.log('🖱️ Mouse up, ending resize');
                 isResizing = false;
                 document.body.style.cursor = '';
-            });
+                document.body.style.userSelect = '';
+                
+                const resizeHandle = document.querySelector('#resize-handle');
+                if (resizeHandle) {
+                    resizeHandle.style.transform = 'scale(1)';
+                }
+                
+                // Save the width to localStorage
+                const currentWidth = this.rightSidebar.offsetWidth;
+                localStorage.setItem('prudence-ai-right-sidebar-width', currentWidth);
+                console.log('💾 Saved width:', currentWidth);
+            }
+        });
+        
+        // Add hover effects
+        document.addEventListener('mouseenter', (e) => {
+            const resizeHandle = e.target.closest('#resize-handle');
+            if (resizeHandle) {
+                resizeHandle.style.transform = 'scale(1.1)';
+            }
+        });
+        
+        document.addEventListener('mouseleave', (e) => {
+            const resizeHandle = e.target.closest('#resize-handle');
+            if (resizeHandle && !isResizing) {
+                resizeHandle.style.transform = 'scale(1)';
+            }
+        });
+        
+        console.log('✅ Resize functionality setup complete');
+    }
+    
+    loadSavedWidth() {
+        const savedWidth = localStorage.getItem('prudence-ai-right-sidebar-width');
+        if (savedWidth) {
+            const width = parseInt(savedWidth);
+            if (width >= 300 && width <= 800) {
+                this.rightSidebar.style.width = width + 'px';
+                
+                // Update main content margin if sidebar is open
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent && this.rightSidebar.classList.contains('open')) {
+                    mainContent.style.marginRight = width + 'px';
+                    mainContent.style.width = `calc(100% - ${width}px)`;
+                }
+                console.log('📏 Loaded saved width:', width);
+            }
         }
     }
 
@@ -623,7 +732,23 @@ class PrudenceAIV2 {
             const mainContent = document.querySelector('.main-content');
             if (mainContent) {
                 mainContent.classList.add('with-right-sidebar');
+                
+                // Set initial width and adjust main content
+                const savedWidth = localStorage.getItem('prudence-ai-right-sidebar-width');
+                const initialWidth = savedWidth ? parseInt(savedWidth) : 400; // Default 400px
+                const finalWidth = Math.max(300, Math.min(800, initialWidth));
+                
+                this.rightSidebar.style.width = finalWidth + 'px';
+                mainContent.style.marginRight = finalWidth + 'px';
+                mainContent.style.width = `calc(100% - ${finalWidth}px)`;
+                
+                console.log('📏 Opened sidebar with width:', finalWidth);
             }
+            
+            // Reinitialize resize functionality when sidebar opens
+            setTimeout(() => {
+                this.initializeRightSidebar();
+            }, 100);
             
             // Auto-scroll to bottom when right sidebar opens
             setTimeout(() => {
@@ -640,6 +765,9 @@ class PrudenceAIV2 {
             const mainContent = document.querySelector('.main-content');
             if (mainContent) {
                 mainContent.classList.remove('with-right-sidebar');
+                // Reset main content styles when sidebar closes
+                mainContent.style.marginRight = '';
+                mainContent.style.width = '';
             }
         }
     }
@@ -977,13 +1105,64 @@ class PrudenceAIV2 {
     }
 
     formatAnswer(text) {
-        return text
-            .replace(/```html([\s\S]*?)```/g, '<pre><code class="language-html">$1</code></pre>')
-            .replace(/```css([\s\S]*?)```/g, '<pre><code class="language-css">$1</code></pre>')
-            .replace(/```javascript([\s\S]*?)```/g, '<pre><code class="language-javascript">$1</code></pre>')
-            .replace(/```scss([\s\S]*?)```/g, '<pre><code class="language-scss">$1</code></pre>')
-            .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+        // Clean up malformed code blocks first
+        let formattedText = text;
+    
+        // Headings (H1, H2, H3)
+        formattedText = formattedText
+            .replace(/^### (.*$)/gim, '<h3 class="response-heading h3">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 class="response-heading h2">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 class="response-heading h1">$1</h1>');
+    
+        // Bold text
+        formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+        // Italic text
+        formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+        // Strikethrough
+        formattedText = formattedText.replace(/~~(.*?)~~/g, '<del>$1</del>');
+    
+        // Inline code
+        formattedText = formattedText.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+    
+        // Blockquotes
+        formattedText = formattedText.replace(/^> (.*$)/gim, '<blockquote class="response-blockquote">$1</blockquote>');
+    
+        // Enhanced code blocks with language detection
+        formattedText = formattedText.replace(/```(\w+)?\n?([\s\S]*?)```/g, (match, lang, code) => {
+            const language = lang || 'text';
+            return `<pre class="code-block"><code class="language-${language}">${this.escapeHtml(code.trim())}</code></pre>`;
+        });
+    
+        // Lists (unordered and ordered)
+        formattedText = formattedText.replace(/^(\s*)[*+-] (.*$)/gim, (match, spaces, content) => {
+            const indent = spaces.length / 2;
+            return `<div class="list-item" style="margin-left: ${indent * 20}px"><span class="list-bullet">•</span> ${content}</div>`;
+        });
+        formattedText = formattedText.replace(/^(\s*)\d+\. (.*$)/gim, (match, spaces, content) => {
+            const indent = spaces.length / 2;
+            const number = match.match(/\d+/)[0];
+            return `<div class="list-item numbered" style="margin-left: ${indent * 20}px"><span class="list-number">${number}.</span> ${content}</div>`;
+        });
+    
+        // Links
+        formattedText = formattedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="response-link">$1</a>');
+    
+        // Paragraphs and line breaks
+        formattedText = formattedText
+            .replace(/\n\n/g, '</p><p class="response-paragraph">')
             .replace(/\n/g, '<br>');
+    
+        // Wrap in paragraph if not already wrapped
+        if (!formattedText.startsWith('<h') && !formattedText.startsWith('<p') && !formattedText.startsWith('<div') && !formattedText.startsWith('<pre')) {
+            formattedText = `<p class="response-paragraph">${formattedText}</p>`;
+        }
+    
+        // Clean up empty paragraphs
+        formattedText = formattedText.replace(/<p class="response-paragraph"><\/p>/g, '');
+    
+        return formattedText;
     }
 
     escapeHtml(text) {
@@ -2268,6 +2447,83 @@ The system will automatically retry when the quota resets.`;
             console.log('❌ Attachment button disabled');
         }
     }
+
+    // Test resize functionality
+    testResizeFunctionality() {
+        console.log('🧪 Testing resize functionality...');
+        
+        const resizeHandle = document.querySelector('#resize-handle');
+        const rightSidebar = document.querySelector('#right-sidebar');
+        
+        console.log('🔍 Resize handle found:', !!resizeHandle);
+        console.log('🔍 Right sidebar found:', !!rightSidebar);
+        
+        if (resizeHandle) {
+            console.log('🔍 Resize handle properties:');
+            console.log('- Display:', window.getComputedStyle(resizeHandle).display);
+            console.log('- Visibility:', window.getComputedStyle(resizeHandle).visibility);
+            console.log('- Opacity:', window.getComputedStyle(resizeHandle).opacity);
+            console.log('- Cursor:', window.getComputedStyle(resizeHandle).cursor);
+            console.log('- Z-index:', window.getComputedStyle(resizeHandle).zIndex);
+            console.log('- Position:', window.getComputedStyle(resizeHandle).position);
+            
+            // Test click event
+            resizeHandle.addEventListener('click', () => {
+                console.log('✅ Resize handle clicked!');
+            });
+            
+            console.log('✅ Click event listener added to resize handle');
+        }
+        
+        if (rightSidebar) {
+            console.log('🔍 Right sidebar properties:');
+            console.log('- Width:', rightSidebar.offsetWidth);
+            console.log('- Display:', window.getComputedStyle(rightSidebar).display);
+            console.log('- Position:', window.getComputedStyle(rightSidebar).position);
+            console.log('- Classes:', rightSidebar.className);
+        }
+        
+        // Check if resize handle is in the DOM
+        const allResizeHandles = document.querySelectorAll('.resize-handle');
+        console.log('🔍 All resize handles found:', allResizeHandles.length);
+        
+        // Check right sidebar controls
+        const controls = document.querySelector('.right-sidebar-controls');
+        console.log('🔍 Right sidebar controls found:', !!controls);
+        if (controls) {
+            console.log('🔍 Controls HTML:', controls.innerHTML);
+        }
+    }
+
+    // Force reset layout
+    resetLayout() {
+        console.log('🔄 Resetting layout...');
+        
+        const mainContent = document.querySelector('.main-content');
+        const rightSidebar = document.querySelector('#right-sidebar');
+        
+        if (mainContent) {
+            mainContent.style.marginRight = '';
+            mainContent.style.width = '';
+            mainContent.classList.remove('with-right-sidebar');
+            console.log('✅ Reset main content styles');
+        }
+        
+        if (rightSidebar) {
+            rightSidebar.style.width = '';
+            rightSidebar.classList.remove('open');
+            console.log('✅ Reset right sidebar styles');
+        }
+        
+        // Show expand button
+        const expandBtn = document.querySelector('#expand-right-sidebar');
+        if (expandBtn) {
+            expandBtn.classList.add('show');
+            console.log('✅ Showed expand button');
+        }
+        
+        console.log('✅ Layout reset complete');
+    }
 }
 
 // ===== INITIALIZATION =====
@@ -2367,4 +2623,90 @@ window.testDropdown = function() {
     }
     
     console.log('✅ Dropdown test completed');
+};
+
+// ===== HELPER FUNCTIONS =====
+
+// Global function to test resize functionality
+window.testResize = function() {
+    if (window.app && window.app.testResizeFunctionality) {
+        window.app.testResizeFunctionality();
+    } else {
+        console.log('❌ App not found or test function not available');
+    }
+};
+
+// Global function to reinitialize resize functionality
+window.reinitResize = function() {
+    if (window.app && window.app.initializeRightSidebar) {
+        window.app.initializeRightSidebar();
+        console.log('✅ Resize functionality reinitialized');
+    } else {
+        console.log('❌ App not found or initialize function not available');
+    }
+};
+
+// Global function to reset layout
+window.resetLayout = function() {
+    if (window.app && window.app.resetLayout) {
+        window.app.resetLayout();
+    } else {
+        console.log('❌ App not found or reset function not available');
+    }
+};
+
+// Global function to test resize handle manually
+window.testResizeHandle = function() {
+    console.log('🧪 Testing resize handle manually...');
+    
+    const resizeHandle = document.querySelector('#resize-handle');
+    const rightSidebar = document.querySelector('#right-sidebar');
+    
+    console.log('🔍 Resize handle element:', resizeHandle);
+    console.log('🔍 Right sidebar element:', rightSidebar);
+    
+    if (resizeHandle) {
+        console.log('🔍 Resize handle properties:');
+        const styles = window.getComputedStyle(resizeHandle);
+        console.log('- Display:', styles.display);
+        console.log('- Visibility:', styles.visibility);
+        console.log('- Opacity:', styles.opacity);
+        console.log('- Cursor:', styles.cursor);
+        console.log('- Z-index:', styles.zIndex);
+        console.log('- Position:', styles.position);
+        console.log('- Left:', styles.left);
+        console.log('- Width:', styles.width);
+        console.log('- Height:', styles.height);
+        console.log('- Background:', styles.background);
+        
+        // Test if it's clickable
+        console.log('🔍 Testing clickability...');
+        resizeHandle.click();
+        
+        // Test if it's visible
+        const rect = resizeHandle.getBoundingClientRect();
+        console.log('🔍 Bounding rect:', rect);
+        console.log('🔍 Is visible:', rect.width > 0 && rect.height > 0);
+        
+        // Make it more visible for testing
+        resizeHandle.style.background = 'red';
+        resizeHandle.style.border = '2px solid blue';
+        console.log('🔍 Made resize handle red with blue border for testing');
+        
+    } else {
+        console.error('❌ Resize handle not found!');
+        
+        // Check if the right sidebar exists
+        if (rightSidebar) {
+            console.log('🔍 Right sidebar HTML:', rightSidebar.innerHTML);
+        }
+        
+        // Check all elements with resize-handle class
+        const allResizeHandles = document.querySelectorAll('.resize-handle');
+        console.log('🔍 All elements with resize-handle class:', allResizeHandles);
+        
+        // Check all elements with id resize-handle
+        const allById = document.querySelectorAll('#resize-handle');
+        console.log('🔍 All elements with id resize-handle:', allById);
+    }
 };
