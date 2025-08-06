@@ -221,6 +221,29 @@ class PrudenceAIV2 {
         this.initializeElements();
         this.initializeEventListeners();
         this.initializeUI();
+        
+        // Add guide download button between ensemble mode and right sidebar buttons
+        setTimeout(() => {
+            const header = document.querySelector('header');
+            if (header && this.compareToggle && this.expandRightSidebarBtn) {
+                header.insertBefore(this.guideDownloadBtn, this.expandRightSidebarBtn);
+                this.guideDownloadBtn.style.marginRight = '10px';
+                console.log('✅ Guide download button added between ensemble mode and right sidebar buttons');
+            } else if (header && this.themeToggle) {
+                // Fallback to theme toggle position
+                header.insertBefore(this.guideDownloadBtn, this.themeToggle);
+                this.guideDownloadBtn.style.marginRight = '10px';
+                console.log('✅ Guide download button added left of theme toggle');
+            } else {
+                // Final fallback positioning
+                this.guideDownloadBtn.style.position = 'fixed';
+                this.guideDownloadBtn.style.top = '35px';
+                this.guideDownloadBtn.style.right = '330px';
+                this.guideDownloadBtn.style.zIndex = '1000';
+                document.body.appendChild(this.guideDownloadBtn);
+                console.log('✅ Guide download button added to body');
+            }
+        }, 100);
         this.renderChatHistory();
         this.startNewChat();
         this.updateSelectedModelsDisplay();
@@ -256,6 +279,24 @@ class PrudenceAIV2 {
         this.themeToggle = document.getElementById('themeToggle');
         this.compareToggle = document.getElementById('compareToggle');
         this.expandRightSidebarBtn = document.getElementById('expandRightSidebarBtn');
+        
+        // Guide download button
+        this.guideDownloadBtn = document.createElement('button');
+        this.guideDownloadBtn.innerHTML = 'Download Guide';
+        this.guideDownloadBtn.className = this.themeToggle.className;
+        this.guideDownloadBtn.style.marginLeft = '10px';
+        this.guideDownloadBtn.style.marginRight = '10px';
+        this.guideDownloadBtn.style.padding = '12px 40px';
+this.guideDownloadBtn.style.fontSize = '1em';
+        this.guideDownloadBtn.style.fontSize = '0.9em';
+        this.guideDownloadBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = './assets/images/guide.html';
+            link.download = 'user_guide.html';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
         
         // Right sidebar elements
         this.rightSidebar = document.getElementById('rightSidebar');
