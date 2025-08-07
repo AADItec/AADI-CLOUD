@@ -2,7 +2,7 @@
 // Adapted from original script to work with Prudence AI v2 UI
 
 import { auth, database } from './core/firebase.js';
-import { loginUser, signUpUser, logoutUser, checkAuthState } from './core/auth.js';
+import { loginUser, signUpUser, logoutUser, checkAuthState, resetPassword } from './core/auth.js';
 import { loadFaqsFromFirebase, getFaqAnswer } from './modules/faq.js';
 import { aiModels } from './modules/aiModels.js';
 import { initializeThemeToggle } from './modules/theme.js';
@@ -435,7 +435,7 @@ class PrudenceAIV2 {
             console.log('🔍 Adding modal submit event listener');
             this.modalSubmit.addEventListener('click', () => {
                 console.log('🔐 Modal submit button clicked');
-                this.handleAuthSubmit();
+                this.handleAuthSubmit(email, password, isLogin);
             });
         } else {
             console.error('❌ Modal submit button not found');
@@ -453,7 +453,7 @@ class PrudenceAIV2 {
             console.log('🔍 Adding modal toggle event listener');
             this.toggleModalAuth.addEventListener('click', () => {
                 console.log('🔐 Modal toggle button clicked');
-                this.toggleAuthMode();
+                this.toggleAuthMode(!isLogin);
             });
         } else {
             console.error('❌ Modal toggle button not found');
@@ -613,9 +613,6 @@ class PrudenceAIV2 {
     initializeRightSidebar() {
         console.log('🔍 Initializing right sidebar resize functionality...');
         
-        // Remove any existing event listeners first
-        this.removeResizeEventListeners();
-        
         // Initialize resize functionality with a more robust approach
         this.setupResizeFunctionality();
         
@@ -623,57 +620,46 @@ class PrudenceAIV2 {
         this.loadSavedWidth();
     }
     
-    removeResizeEventListeners() {
-        // Remove existing event listeners if any
-        const resizeHandle = document.querySelector('#resize-handle');
-        if (resizeHandle) {
-            const newResizeHandle = resizeHandle.cloneNode(true);
-            resizeHandle.parentNode.replaceChild(newResizeHandle, resizeHandle);
-        }
-    }
-    
     setupResizeFunctionality() {
         let isResizing = false;
         let startX, startWidth;
+        const self = this; // Capture 'this' context
         
-        // Test if resize handle exists and is clickable
-        const resizeHandle = document.querySelector('#resize-handle');
-        if (resizeHandle) {
-            console.log('✅ Resize handle found:', resizeHandle);
-            console.log('🔍 Resize handle styles:', {
-                display: window.getComputedStyle(resizeHandle).display,
-                visibility: window.getComputedStyle(resizeHandle).visibility,
-                opacity: window.getComputedStyle(resizeHandle).opacity,
-                cursor: window.getComputedStyle(resizeHandle).cursor,
-                pointerEvents: window.getComputedStyle(resizeHandle).pointerEvents
-            });
-            
-            // Add a simple click test
-            resizeHandle.addEventListener('click', (e) => {
-                console.log('✅ Resize handle clicked!');
-                e.stopPropagation();
-            });
-        } else {
-            console.error('❌ Resize handle not found!');
+        // Select the existing resize handle button
+        self.resizeHandle = self.rightSidebar.querySelector('.resize-handle');
+        
+        if (!self.resizeHandle) {
+            console.error('❌ Resize handle button not found in right sidebar!');
+            return;
         }
         
-        // Use event delegation for better reliability
-        document.addEventListener('mousedown', (e) => {
-            const resizeHandle = e.target.closest('#resize-handle');
-            if (!resizeHandle) return;
-            
+        console.log('✅ Resize handle button found:', self.resizeHandle);
+        console.log('🔍 Resize handle button styles:', {
+            display: window.getComputedStyle(self.resizeHandle).display,
+            visibility: window.getComputedStyle(self.resizeHandle).visibility,
+            opacity: window.getComputedStyle(self.resizeHandle).opacity,
+            cursor: window.getComputedStyle(self.resizeHandle).cursor,
+            pointerEvents: window.getComputedStyle(self.resizeHandle).pointerEvents
+        });
+        
+        // Add mousedown listener directly to the resize handle button
+        self.resizeHandle.addEventListener('mousedown', (e) => {
             console.log('🖱️ Mouse down on resize handle');
             isResizing = true;
             startX = e.clientX;
-            startWidth = this.rightSidebar.offsetWidth;
+            startWidth = self.rightSidebar.offsetWidth;
             
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
-            resizeHandle.style.transform = 'scale(1.1)';
+            self.resizeHandle.style.transform = 'scale(1.1)';
+            self.rightSidebar.style.transition = 'none'; // Disable transitions during resize
             
             e.preventDefault();
             e.stopPropagation();
         });
+        
+        // Use event delegation for mousemove and mouseup on document
+
         
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
@@ -683,11 +669,11 @@ class PrudenceAIV2 {
             
             // Constrain width between 300px and 800px
             if (newWidth >= 300 && newWidth <= 800) {
-                this.rightSidebar.style.width = newWidth + 'px';
+                self.rightSidebar.style.width = newWidth + 'px';
                 
                 // Update main content margin and width
                 const mainContent = document.querySelector('.main-content');
-                if (mainContent && this.rightSidebar.classList.contains('open')) {
+                if (mainContent && self.rightSidebar.classList.contains('open')) {
                     mainContent.style.marginRight = newWidth + 'px';
                     mainContent.style.width = `calc(100% - ${newWidth}px)`;
                     console.log('📏 Updated main content - width:', newWidth, 'marginRight:', newWidth);
@@ -696,19 +682,25 @@ class PrudenceAIV2 {
         });
         
         document.addEventListener('mouseup', () => {
+            console.log('Mouseup event fired.');
+            console.log('Value of self:', self);
+            console.log('Value of self.resizeHandle:', self.resizeHandle);
             if (isResizing) {
-                console.log('🖱️ Mouse up, ending resize');
-                isResizing = false;
+                isResizing = false; // Set to false immediately
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
+                self.resizeHandle.style.transform = ''; // Reset transform on mouse up
+                self.rightSidebar.style.transition = ''; // Re-enable transitions after resize
+                self.saveCurrentWidth();
+                console.log('🖱️ Mouse up, ending resize');
                 
-                const resizeHandle = document.querySelector('#resize-handle');
-                if (resizeHandle) {
-                    resizeHandle.style.transform = 'scale(1)';
+                console.log('🔍 Checking self.resizeHandle before transform:', self.resizeHandle);
+                if (self.resizeHandle) {
+                    self.resizeHandle.style.transform = 'scale(1)';
                 }
                 
                 // Save the width to localStorage
-                const currentWidth = this.rightSidebar.offsetWidth;
+                const currentWidth = self.rightSidebar.offsetWidth;
                 localStorage.setItem('prudence-ai-right-sidebar-width', currentWidth);
                 console.log('💾 Saved width:', currentWidth);
             }
@@ -716,22 +708,27 @@ class PrudenceAIV2 {
         
         // Add hover effects
         document.addEventListener('mouseenter', (e) => {
-            const resizeHandle = e.target.closest('#resize-handle');
-            if (resizeHandle) {
-                resizeHandle.style.transform = 'scale(1.1)';
+            // Check if the event target is the resize handle or a child of it
+            if (self.resizeHandle && (e.target === self.resizeHandle || self.resizeHandle.contains(e.target))) {
+                self.resizeHandle.style.transform = 'scale(1.1)';
             }
         });
         
         document.addEventListener('mouseleave', (e) => {
-            const resizeHandle = e.target.closest('#resize-handle');
-            if (resizeHandle && !isResizing) {
-                resizeHandle.style.transform = 'scale(1)';
+            if (self.resizeHandle && (e.target === self.resizeHandle || self.resizeHandle.contains(e.target)) && !isResizing) {
+                self.resizeHandle.style.transform = 'scale(1)';
             }
         });
         
         console.log('✅ Resize functionality setup complete');
     }
     
+    saveCurrentWidth() {
+        const currentWidth = this.rightSidebar.offsetWidth;
+        localStorage.setItem('prudence-ai-right-sidebar-width', currentWidth);
+        console.log('💾 Saved width to local storage:', currentWidth);
+    }
+
     loadSavedWidth() {
         const savedWidth = localStorage.getItem('prudence-ai-right-sidebar-width');
         if (savedWidth) {
@@ -1311,6 +1308,7 @@ class PrudenceAIV2 {
             <button id="dynamicSubmit" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 10px 0;">${isLogin ? 'Login' : 'Sign Up'}</button>
             <button id="dynamicClose" style="width: 100%; padding: 12px; background: #ccc; color: black; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 10px 0;">Close</button>
             <div id="dynamicToggle" style="margin-top: 15px; color: #667eea; cursor: pointer; text-align: center; font-size: 14px;">${isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}</div>
+            <div id="forgotPassword" style="margin-top: 10px; color: #667eea; cursor: pointer; text-align: center; font-size: 14px;">Forgot Password?</div>
         `;
         
         modalOverlay.appendChild(modalContent);
@@ -1320,6 +1318,7 @@ class PrudenceAIV2 {
         const submitBtn = document.getElementById('dynamicSubmit');
         const closeBtn = document.getElementById('dynamicClose');
         const toggleBtn = document.getElementById('dynamicToggle');
+        const forgotPasswordBtn = document.getElementById('forgotPassword');
         const emailInput = document.getElementById('dynamicEmail');
         const passwordInput = document.getElementById('dynamicPassword');
         
@@ -1349,6 +1348,11 @@ class PrudenceAIV2 {
             modalOverlay.remove();
             this.showAuthModal(!isLogin);
         });
+
+        forgotPasswordBtn.addEventListener('click', () => {
+            modalOverlay.remove();
+            this.handleForgotPassword();
+        });
         
         // Close on overlay click
         modalOverlay.addEventListener('click', (e) => {
@@ -1371,19 +1375,14 @@ class PrudenceAIV2 {
         }
     }
 
-    handleAuthSubmit() {
+    handleAuthSubmit(email, password, isLogin) {
         console.log('🔐 Auth submit button clicked');
-        const email = this.modalEmail.value.trim();
-        const password = this.modalPassword.value.trim();
-        
-        console.log('🔍 Form values:', { email: email ? 'provided' : 'empty', password: password ? 'provided' : 'empty' });
         
         if (!email || !password) {
             alert("Email and password are required");
             return;
         }
         
-        const isLogin = this.modalTitle.textContent === 'Login';
         console.log('🔍 Auth mode:', isLogin ? 'Login' : 'Sign Up');
         
         if (isLogin) {
@@ -1393,11 +1392,34 @@ class PrudenceAIV2 {
         }
     }
 
-    toggleAuthMode() {
+    toggleAuthMode(isLogin) {
         console.log('🔐 Toggling auth mode');
-        const isLogin = this.modalTitle.textContent === 'Login';
         console.log('🔍 Current mode:', isLogin ? 'Login' : 'Sign Up');
         this.showAuthModal(!isLogin);
+    }
+
+    handleForgotPassword() {
+        console.log('🔐 Forgot Password clicked');
+        const email = prompt("Please enter your email address to reset your password:");
+        console.log('Email entered in prompt:', email);
+        if (email) {
+            console.log('Attempting to send password reset email to:', email);
+            resetPassword(email,
+                () => {
+                    console.log('✅ Password reset email sent successfully.');
+                    alert("Password reset email sent! Please check your inbox.");
+                },
+                (error) => {
+                    console.error("❌ Error sending password reset email:", error.message);
+                    alert(`Error: ${error.message}`);
+                }
+            );
+        } else if (email === '') {
+            console.log('Password reset cancelled: Email was empty.');
+            alert('Email cannot be empty.');
+        } else {
+            console.log('Password reset cancelled: No email entered.');
+        }
     }
 
     loginUser(email, password) {
