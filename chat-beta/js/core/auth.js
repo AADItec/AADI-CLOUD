@@ -1,5 +1,5 @@
 import { auth, database } from './firebase.js';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
 export function loginUser(email, password, onSuccess, onError) {
@@ -43,4 +43,15 @@ export function checkAuthState(onChange) {
     onAuthStateChanged(auth, (user) => {
         if (onChange) onChange(user);
     });
-} 
+}
+
+export function resetPassword(email, onSuccess, onError) {
+    console.log('resetPassword function called with email:', email);
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            if (onSuccess) onSuccess();
+        })
+        .catch((error) => {
+            if (onError) onError(error);
+        });
+}
