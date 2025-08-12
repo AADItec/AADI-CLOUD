@@ -523,3 +523,28 @@ body {
     flex-grow: 1;
     padding: 5px;
 }
+
+
+.under-construction {
+    text-align: center;
+    padding: 30px;
+    background: #f9fafb;
+    border: 1px dashed #cbd5e0;
+    border-radius: 10px;
+}
+.uc-image {
+    max-width: 280px;
+    width: 100%;
+    margin-bottom: 15px;
+    animation: float 3s ease-in-out infinite;
+}
+.under-construction p {
+    font-size: 1.1em;
+    color: #4a5568;
+}
+
+/* Floating animation for the SVG */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
