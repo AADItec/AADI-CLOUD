@@ -4,6 +4,47 @@
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
+/* Dropdown Styles */
+.dropdown {
+    position: relative;
+    display: block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #333;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    left: 100%; /* Position to the right of the parent li */
+    top: 0; /* Align with the top of the parent li */
+    margin-left: 10px; /* Add some space between the parent and dropdown */
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background-color: #575757;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-icon {
+    float: right;
+    margin-left: 5px;
+}
+
+/* Basic Styles */
+
 /* Token Usage Styles */
 .token-usage {
     background-color: rgba(255, 255, 255, 0.1);
