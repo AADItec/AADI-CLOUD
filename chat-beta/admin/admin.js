@@ -16,37 +16,55 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 document.addEventListener('DOMContentLoaded', function() {
-    const navLinks = document.querySelectorAll('.admin-sidebar nav ul li a');
-    const sections = document.querySelectorAll('.admin-section');
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            // Remove active class from all links
-            navLinks.forEach(nav => nav.classList.remove('active'));
-            // Add active class to the clicked link
-            this.classList.add('active');
-
-            // Remove active class from all sections
-            sections.forEach(section => section.classList.remove('active'));
-
-            // Add active class to the target section
-            const targetId = this.getAttribute('href').substring(1);
-            const targetSection = document.getElementById(targetId);
-            targetSection.classList.add('active');
-
+    // Function to show a specific section and hide others
+    function showSection(sectionId) {
+        document.querySelectorAll('.admin-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.style.display = 'block';
             // If the user management section is active, display users
-            if (targetId === 'user-management') {
+            if (sectionId === 'user-management') {
                 displayUsers();
             }
-         });
+        }
+    }
+
+    // Event listeners for sidebar navigation
+    document.querySelectorAll('.admin-sidebar nav ul li a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Remove active class from all main navigation links
+            document.querySelectorAll('.admin-sidebar nav ul li > a').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+
+            // Add active class to the clicked link, unless it's a dropdown button
+            if (!this.classList.contains('dropbtn')) {
+                this.classList.add('active');
+            }
+
+            showSection(this.getAttribute('href').substring(1));
+        });
     });
 
-    // Initially show the first section or a default one
-    if (navLinks.length > 0) {
-        navLinks[0].click();
-    }
+    // Event listeners for dropdown items
+    document.querySelectorAll('.dropdown-content a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Remove active class from all main navigation links
+            document.querySelectorAll('.admin-sidebar nav ul li > a').forEach(navLink => {
+                navLink.classList.remove('active');
+            });
+            // Optionally, add active class to the parent dropdown button if desired
+            this.closest('.dropdown').querySelector('.dropbtn').classList.add('active');
+            showSection(this.getAttribute('href').substring(1));
+        });
+    });
+
+    // Show the user management section by default
+    showSection('user-management');
 
     // Function to update token usage display
     function updateTokenUsage() {
@@ -281,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.templates.splice(index, 1);
                 // Refresh the display
                 displayTemplates();
-                alert('Template deleted successfully from Firebase!');
+                alert('Template deleted successfully!');
             } catch (error) {
                 console.error('Error deleting template:', error);
                 alert('Error deleting template: ' + error.message);
@@ -347,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Save to Firebase
             await set(ref(db, `templates/${templateKey}/data`), templateData);
-            console.log('Firebase save completed');
+            console.log('Template save completed');
             
             // Update local data
             if (!isNaN(editingIndex)) {
@@ -366,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function() {
             templateForm.reset(); // Clear form fields
             delete templateForm.dataset.editingIndex; // Clear editing state
 
-            alert(isNaN(editingIndex) ? 'New template saved to Firebase!' : 'Template updated successfully in Firebase!');
+            alert(isNaN(editingIndex) ? 'New template saved!' : 'Template updated successfully!');
         } catch (error) {
             console.error('Error saving template:', error);
             alert('Error saving template: ' + error.message);
