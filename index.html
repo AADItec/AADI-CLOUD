@@ -3,1561 +3,1363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AADI CLOUD - Your Personal AI, Hosted on Private VPS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>AADI CLOUD - Your Personal AI. Your Private Server.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,300;1,9..144,700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            /* Dark hero palette — kept for hero/header/footer only */
+            --navy: #060d1f;
+            --navy-2: #0b1628;
+            --navy-3: #0f1e35;
+            --navy-4: #162340;
+            --blue: #2563eb;
+            --blue-light: #3b82f6;
+            --blue-mid: #1d4ed8;
+            --cyan: #0ea5e9;
+            --purple: #7c3aed;
+            --green: #059669;
+            /* Light section palette */
+            --light-bg: #f8faff;
+            --light-bg-2: #ffffff;
+            --light-bg-3: #eef2ff;
+            --light-bg-4: #f0f9ff;
+            --light-text: #0f172a;
+            --light-text-2: #1e3a5f;
+            --light-muted: #64748b;
+            --light-border: rgba(37,99,235,0.12);
+            --light-border-bright: rgba(37,99,235,0.3);
+            --light-card: #ffffff;
+            --light-card-2: #f8faff;
+            /* Shared */
+            --text: #e8edf5;
+            --text-muted: #7a8aa0;
+            --text-dim: #3d4f66;
+            --border: rgba(45,126,247,0.15);
+            --border-bright: rgba(45,126,247,0.35);
+            --card-bg: rgba(11,22,40,0.7);
+            --glow-blue: 0 0 60px rgba(45,126,247,0.15);
+            --shadow-card: 0 2px 20px rgba(37,99,235,0.08), 0 1px 4px rgba(0,0,0,0.04);
+            --shadow-hover: 0 8px 40px rgba(37,99,235,0.14), 0 2px 8px rgba(0,0,0,0.06);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.6;
-            color: #1e293b;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Manrope', sans-serif;
+            background: var(--light-bg);
+            color: var(--light-text);
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+        h1, h2, h3, h4, .logo { font-family: 'Fraunces', serif; }
 
-        /* Header */
+        .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+        /* ── HEADER ── */
         header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 4px 32px rgba(0,0,0,0.1);
-            z-index: 1000;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(6,13,31,0.85);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
 
         nav {
-            display: flex;
+            display: flex; align-items: center;
             justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 0;
+            padding: 1.1rem 0;
         }
 
         .logo {
-            font-size: 2.2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 3s ease-in-out infinite;
-            position: relative;
+            font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, var(--blue-light) 50%, var(--cyan) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
 
-        .logo::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
-            border-radius: 2px;
-            opacity: 0.3;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2.5rem;
-            list-style: none;
-        }
-
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
         .nav-links a {
-            color: #475569;
+            color: var(--text-muted); text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: #e0eaff; }
+
+        .nav-cta {
+            background: var(--blue); color: #fff;
+            padding: 0.55rem 1.4rem; border-radius: 8px;
+            font-size: 0.88rem; font-weight: 600;
             text-decoration: none;
-            font-weight: 500;
-            position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+        .nav-cta:hover { background: var(--blue-light); transform: translateY(-1px); }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: #3b82f6;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .cta-button {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: #fff;
-            padding: 0.8rem 2rem;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.6s;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
-        }
-
-        .cta-button:hover::before {
-            left: 100%;
-        }
-
-        /* ===================== HERO SECTION — UPDATED ===================== */
+        /* ── HERO ── */
         .hero {
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f2044 100%);
-            padding-top: 6rem;
+            display: flex; align-items: center;
+            position: relative; overflow: hidden;
+            padding: 8rem 0 4rem;
+            background: var(--navy);
         }
 
-        /* Animated grid background */
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
+        .hero-grid-bg {
+            position: absolute; inset: 0;
             background-image:
-                linear-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(59, 130, 246, 0.07) 1px, transparent 1px);
-            background-size: 48px 48px;
-            animation: gridDrift 20s linear infinite;
+                linear-gradient(rgba(45,126,247,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45,126,247,0.05) 1px, transparent 1px);
+            background-size: 52px 52px;
+            animation: gridDrift 25s linear infinite;
         }
 
-        /* Radial glow blobs */
-        .hero::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 60% 50% at 15% 40%, rgba(59, 130, 246, 0.18) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 85% 60%, rgba(139, 92, 246, 0.18) 0%, transparent 60%),
-                radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 60%);
-            animation: blobPulse 8s ease-in-out infinite alternate;
-        }
-
-        .hero-content {
-            z-index: 2;
-            max-width: 780px;
-            position: relative;
-        }
-
-        /* Badge pill */
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.35);
-            color: #93c5fd;
-            padding: 0.4rem 1.1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            margin-bottom: 1.8rem;
-            animation: fadeInUp 0.8s ease both;
-            backdrop-filter: blur(8px);
-        }
-
-        .hero-badge .dot {
-            width: 7px;
-            height: 7px;
-            background: #3b82f6;
+        .hero-glow-1 {
+            position: absolute; width: 700px; height: 700px;
             border-radius: 50%;
-            animation: blink 1.5s ease-in-out infinite;
+            background: radial-gradient(circle, rgba(45,126,247,0.12) 0%, transparent 70%);
+            top: -200px; left: -200px; pointer-events: none;
+        }
+        .hero-glow-2 {
+            position: absolute; width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(124,92,252,0.1) 0%, transparent 70%);
+            bottom: 0; right: -100px; pointer-events: none;
+        }
+
+        .hero-inner {
+            position: relative; z-index: 2;
+            display: grid; grid-template-columns: 1fr 420px;
+            gap: 4rem; align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(45,126,247,0.1);
+            border: 1px solid rgba(45,126,247,0.3);
+            color: var(--blue-light);
+            padding: 0.38rem 1rem; border-radius: 50px;
+            font-size: 0.78rem; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            margin-bottom: 1.6rem;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .badge-dot {
+            width: 6px; height: 6px; background: var(--cyan);
+            border-radius: 50%; animation: blink 1.5s infinite;
         }
 
         .hero h1 {
-            font-size: 4.2rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: #f8fafc;
-            line-height: 1.1;
-            animation: fadeInUp 0.9s ease 0.1s both;
+            font-size: 3.8rem; font-weight: 800;
+            line-height: 1.08; letter-spacing: -0.03em;
+            margin-bottom: 1.2rem;
+            animation: fadeUp 0.8s ease 0.1s both;
+            color: #fff;
         }
 
-        .hero h1 .highlight {
-            background: linear-gradient(135deg, #60a5fa, #a78bfa, #22d3ee);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            background-size: 200% 200%;
-            animation: gradientShift 4s ease-in-out infinite;
+        .hero h1 .grad {
+            background: linear-gradient(135deg, var(--blue-light), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
 
-        .hero-tagline {
-            font-size: 1.25rem;
-            color: #94a3b8;
+        .hero-sub {
+            font-size: 1.08rem; color: var(--text-muted);
+            max-width: 540px; line-height: 1.75;
             margin-bottom: 2rem;
-            font-weight: 400;
-            line-height: 1.7;
-            animation: fadeInUp 0.9s ease 0.2s both;
-            max-width: 620px;
+            animation: fadeUp 0.8s ease 0.2s both;
         }
+        .hero-sub strong { color: #c8d8ef; font-weight: 500; }
 
-        .hero-tagline strong {
-            color: #cbd5e1;
-            font-weight: 600;
-        }
-
-        /* Feature pills row */
         .hero-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7rem;
-            margin-bottom: 2.5rem;
-            animation: fadeInUp 0.9s ease 0.35s both;
+            display: flex; flex-wrap: wrap; gap: 0.6rem;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.8s ease 0.3s both;
         }
 
-        .hero-pill {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            color: #cbd5e1;
-            padding: 0.4rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            backdrop-filter: blur(6px);
-            transition: all 0.3s ease;
+        .pill {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #8fa8c4; padding: 0.35rem 0.9rem;
+            border-radius: 50px; font-size: 0.8rem; font-weight: 500;
         }
 
-        .hero-pill:hover {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.4);
-            color: #93c5fd;
-            transform: translateY(-2px);
-        }
-
-        .hero-pill .pill-icon {
-            font-size: 1rem;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 1.2rem;
-            animation: fadeInUp 0.9s ease 0.5s both;
-            flex-wrap: wrap;
+        .hero-btns {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+            animation: fadeUp 0.8s ease 0.4s both;
+            margin-bottom: 2.4rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: #fff;
-            padding: 0.9rem 2.2rem;
-            border: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 24px rgba(59, 130, 246, 0.4);
-            position: relative;
-            overflow: hidden;
+            background: var(--blue); color: #fff;
+            padding: 0.8rem 1.8rem; border-radius: 10px;
+            font-weight: 700; font-size: 0.95rem;
+            text-decoration: none; display: inline-flex;
+            align-items: center; gap: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: all 0.25s; box-shadow: 0 4px 24px rgba(45,126,247,0.35);
         }
+        .btn-primary:hover { background: var(--blue-light); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(45,126,247,0.5); }
 
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.6s;
+        .btn-ghost {
+            background: transparent; color: var(--text-muted);
+            padding: 0.8rem 1.8rem; border-radius: 10px;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; display: inline-flex;
+            align-items: center; gap: 0.5rem;
+            border: 1px solid var(--border-bright);
+            transition: all 0.25s;
         }
+        .btn-ghost:hover { color: #fff; border-color: rgba(45,126,247,0.6); background: rgba(45,126,247,0.08); }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 36px rgba(59, 130, 246, 0.5);
+        .powered-row {
+            animation: fadeUp 0.8s ease 0.5s both;
         }
-
-        .btn-primary:hover::before { left: 100%; }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.06);
-            color: #e2e8f0;
-            padding: 0.9rem 2.2rem;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            backdrop-filter: blur(10px);
+        .powered-label {
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--text-dim);
+            margin-bottom: 0.7rem;
         }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.12);
-            border-color: rgba(255,255,255,0.4);
-            transform: translateY(-3px);
+        .powered-badges {
+            display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
         }
-
-        /* Floating server visual (right side) */
-        .hero-visual {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 42%;
-            max-width: 500px;
-            z-index: 2;
-            animation: fadeInRight 1.2s ease 0.4s both;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .p-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #6a7f96; padding: 0.35rem 0.85rem;
+            border-radius: 8px; font-size: 0.78rem; font-weight: 600;
+            cursor: default;
         }
+        .p-sep { color: var(--text-dim); font-size: 0.8rem; }
+
+        .ai-row {
+            margin-top: 1.4rem; padding-top: 1.4rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            animation: fadeUp 0.8s ease 0.6s both;
+            padding-bottom: 2rem;
+        }
+        .ai-label {
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--text-dim);
+            margin-bottom: 0.7rem;
+        }
+        .ai-badges { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .ai-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.35rem 0.85rem; border-radius: 8px;
+            font-size: 0.78rem; font-weight: 600; cursor: default;
+        }
+        .ai-wa { background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.2); color: #4ade80; }
+        .ai-tg { background: rgba(0,136,204,0.08); border: 1px solid rgba(0,136,204,0.2); color: #38bdf8; }
+        .ai-sl { background: rgba(224,30,90,0.08); border: 1px solid rgba(224,30,90,0.2); color: #f472b6; }
+        .ai-em { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); color: #fbbf24; }
+
+        /* Hero right — server card */
+        .hero-right { animation: fadeLeft 1s ease 0.3s both; }
 
         .server-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 24px;
-            padding: 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 1.6rem;
             backdrop-filter: blur(20px);
-            width: 100%;
-            box-shadow:
-                0 0 0 1px rgba(59, 130, 246, 0.1),
-                0 32px 64px rgba(0,0,0,0.4),
-                inset 0 1px 0 rgba(255,255,255,0.08);
-            animation: cardFloat 6s ease-in-out infinite;
+            box-shadow: var(--glow-blue), 0 32px 64px rgba(0,0,0,0.5);
+            animation: cardFloat 7s ease-in-out infinite;
         }
 
-        .server-header {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .server-dots {
-            display: flex;
-            gap: 0.4rem;
-        }
-
-        .server-dots span {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .dot-red { background: #ef4444; }
-        .dot-yellow { background: #f59e0b; }
-        .dot-green { background: #22c55e; animation: blink 2s ease-in-out infinite; }
-
-        .server-title {
-            color: #64748b;
-            font-size: 0.8rem;
-            font-family: 'Courier New', monospace;
-        }
-
-        .server-stat {
-            display: flex;
-            align-items: center;
+        .sc-header {
+            display: flex; align-items: center;
             justify-content: space-between;
-            margin-bottom: 1rem;
+            margin-bottom: 1.4rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        .stat-label {
-            color: #64748b;
-            font-size: 0.8rem;
-            font-family: 'Courier New', monospace;
+        .sc-dots { display: flex; gap: 6px; }
+        .sc-dots span { width: 10px; height: 10px; border-radius: 50%; }
+        .d-r { background: #ff5f57; } .d-y { background: #febc2e; } .d-g { background: #28c840; animation: blink 2s infinite; }
+
+        .sc-title { font-size: 0.72rem; color: #3d5470; font-family: 'Courier New', monospace; }
+
+        .sc-stat { margin-bottom: 0.9rem; }
+        .sc-stat-header { display: flex; justify-content: space-between; margin-bottom: 0.35rem; }
+        .sc-stat-label { font-size: 0.73rem; color: #4a6080; font-family: monospace; }
+        .sc-stat-val { font-size: 0.73rem; color: #6a8aaa; font-family: monospace; }
+        .sc-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+        .sc-fill { height: 100%; border-radius: 4px; animation: fillUp 2s ease-out forwards; }
+        .sf-blue { background: linear-gradient(90deg, var(--blue), var(--cyan)); width: 68%; }
+        .sf-purple { background: linear-gradient(90deg, var(--purple), #a78bfa); width: 42%; }
+        .sf-cyan { background: linear-gradient(90deg, var(--cyan), #00ffcc); width: 91%; }
+
+        .sc-ai {
+            margin-top: 1.2rem;
+            background: linear-gradient(135deg, rgba(45,126,247,0.1), rgba(124,92,252,0.1));
+            border: 1px solid rgba(45,126,247,0.2);
+            border-radius: 12px; padding: 1rem;
+            display: flex; align-items: center; gap: 0.8rem;
         }
 
-        .stat-bar {
-            flex: 1;
-            height: 4px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 4px;
-            margin: 0 0.8rem;
-            overflow: hidden;
+        .sc-ai-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+            animation: aiPulse 2.5s ease-in-out infinite;
         }
 
-        .stat-fill {
-            height: 100%;
-            border-radius: 4px;
-            animation: fillAnimate 2s ease-out forwards;
+        .sc-ai-model { font-size: 0.82rem; font-weight: 600; color: #c8d8ef; }
+        .sc-ai-status {
+            font-size: 0.7rem; color: var(--green);
+            display: flex; align-items: center; gap: 0.3rem; margin-top: 2px;
         }
+        .sc-ai-status::before { content: ''; width: 5px; height: 5px; background: var(--green); border-radius: 50%; animation: blink 1.5s infinite; }
 
-        .fill-blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); width: 72%; }
-        .fill-purple { background: linear-gradient(90deg, #8b5cf6, #a78bfa); width: 45%; }
-        .fill-cyan { background: linear-gradient(90deg, #06b6d4, #22d3ee); width: 88%; }
-
-        .stat-value {
-            color: #94a3b8;
-            font-size: 0.8rem;
-            font-family: 'Courier New', monospace;
-            min-width: 40px;
-            text-align: right;
-        }
-
-        .server-ai-badge {
-            margin-top: 1.5rem;
-            background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
-            border: 1px solid rgba(139,92,246,0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .ai-pulse {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-            animation: aiPulse 2s ease-in-out infinite;
-        }
-
-        .ai-text {
-            flex: 1;
-        }
-
-        .ai-text .ai-model {
-            color: #e2e8f0;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .ai-text .ai-status {
-            color: #22c55e;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .ai-text .ai-status::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: blink 1.5s ease-in-out infinite;
-        }
-
-        /* Enhanced floating particles */
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.7;
-            animation: float 8s ease-in-out infinite;
-        }
-
-        .particle-1 {
-            width: 6px; height: 6px;
-            background: linear-gradient(45deg, #3b82f6, #06b6d4);
-            top: 20%; left: 10%;
-            animation-delay: 0s;
-        }
-
-        .particle-2 {
-            width: 4px; height: 4px;
-            background: linear-gradient(45deg, #8b5cf6, #06b6d4);
-            top: 80%; left: 20%;
-            animation-delay: 2s;
-        }
-
-        .particle-3 {
-            width: 8px; height: 8px;
-            background: linear-gradient(45deg, #06b6d4, #3b82f6);
-            top: 30%; right: 48%;
-            animation-delay: 4s;
-        }
-
-        .particle-4 {
-            width: 5px; height: 5px;
-            background: linear-gradient(45deg, #8b5cf6, #3b82f6);
-            top: 70%; right: 50%;
-            animation-delay: 6s;
-        }
-
-        /* ===================== END HERO — REST UNCHANGED ===================== */
-
-        /* Core Features Section */
-        .features {
-            padding: 6rem 0;
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            position: relative;
-        }
-
-        .features::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 70% 30%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 30% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #1e293b 0%, #3b82f6 50%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.1rem;
-            color: #64748b;
-            margin-bottom: 4rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 2.5rem;
-            margin-top: 4rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        .feature-card {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 3rem 2.5rem;
-            border-radius: 24px;
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: 0 4px 24px rgba(59, 130, 246, 0.1);
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
-            transform: scaleX(0);
-            transition: transform 0.4s ease;
-        }
-
-        .feature-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 48px rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #e0f2fe, #bfdbfe);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 2rem;
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover .feature-icon {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #1e293b;
-        }
-
-        .feature-card p {
-            color: #64748b;
-            line-height: 1.7;
-        }
-
-        /* Platform Features */
-        .platform-features {
-            padding: 6rem 0;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        }
-
-        .platform-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-            gap: 2.5rem;
-            margin-top: 4rem;
-        }
-
-        .platform-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%);
-            padding: 3rem 2.5rem;
-            border-radius: 24px;
-            border: 1px solid rgba(59, 130, 246, 0.1);
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: 0 4px 24px rgba(59, 130, 246, 0.08);
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .platform-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .platform-card:hover::after {
-            opacity: 1;
-        }
-
-        .platform-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.2);
-        }
-
-        .platform-card h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-            z-index: 2;
-        }
-
-        .platform-card ul {
-            list-style: none;
-            color: #64748b;
-            position: relative;
-            z-index: 2;
-        }
-
-        .platform-card li {
-            margin-bottom: 0.8rem;
-            padding-left: 1.5rem;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .platform-card li::before {
-            content: "▶";
-            position: absolute;
-            left: 0;
-            color: #3b82f6;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-        }
-
-        .platform-card:hover li::before {
-            color: #8b5cf6;
-            transform: translateX(3px);
-        }
-
-        /* Services Section */
-        .services {
-            padding: 6rem 0;
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        }
-
-        .services-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        .service-item {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 2.5rem 2rem;
-            border-radius: 20px;
-            border-left: 4px solid #3b82f6;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.08);
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .service-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            transform: scaleY(0);
-            transition: transform 0.4s ease;
-        }
-
-        .service-item:hover::before {
-            transform: scaleY(1);
-        }
-
-        .service-item:hover {
-            background: rgba(248, 250, 252, 0.95);
-            transform: translateX(8px);
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
-        }
-
-        .service-item h4 {
-            color: #1e293b;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-            font-size: 1.1rem;
-        }
-
-        .service-item p {
-            color: #64748b;
-            line-height: 1.6;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 6rem 0;
-            text-align: center;
-            background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-        }
-
-        .cta-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .cta-content h2 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .cta-content p {
-            font-size: 1.3rem;
-            margin-bottom: 3rem;
-            color: #cbd5e1;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.7;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .cta-button-white {
-            background: rgba(255, 255, 255, 0.95);
-            color: #1e293b;
-            padding: 1rem 2.5rem;
-            border: none;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            text-decoration: none;
-            display: inline-block;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .cta-button-white:hover {
+        /* ── TRUST BAR ── */
+        .trust-bar {
             background: #fff;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border-top: 1px solid var(--light-border);
+            border-bottom: 1px solid var(--light-border);
+            padding: 1.4rem 0;
         }
 
-        .cta-button-outline {
-            background: transparent;
-            color: #fff;
-            padding: 1rem 2.5rem;
-            border: 2px solid rgba(255,255,255,0.5);
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            text-decoration: none;
-            display: inline-block;
-            backdrop-filter: blur(10px);
+        .trust-inner {
+            display: flex; align-items: center;
+            justify-content: space-around; gap: 2rem; flex-wrap: wrap;
         }
 
-        .cta-button-outline:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: #fff;
-            transform: translateY(-3px);
+        .trust-item {
+            display: flex; align-items: center; gap: 0.6rem;
+            font-size: 0.85rem; color: var(--light-muted);
         }
+        .trust-item .t-icon { font-size: 1.1rem; }
+        .trust-item strong { color: var(--light-text); font-weight: 700; }
 
-        /* Enhanced Footer */
-        footer {
-            background: #0f172a;
-            color: #e2e8f0;
-            padding: 4rem 0 2rem;
-            position: relative;
-            overflow: hidden;
-        }
+        /* ── SECTION BASE ── */
+        section { padding: 6rem 0; }
 
-        footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #3b82f6, #8b5cf6, transparent);
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-
-        .footer-column h3 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .footer-column p,
-        .footer-column a {
-            color: #94a3b8;
-            text-decoration: none;
-            line-height: 1.6;
-            transition: color 0.3s ease;
-        }
-
-        .footer-column a:hover {
-            color: #3b82f6;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.8rem;
-        }
-
-        .footer-links a {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            transform: translateX(5px);
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
+        .sec-label {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--blue);
             margin-bottom: 1rem;
         }
+        .sec-label::before { content: ''; width: 20px; height: 1px; background: var(--blue); }
 
-        .contact-icon {
-            width: 20px;
-            height: 20px;
-            color: #3b82f6;
+        .sec-title {
+            font-size: 2.8rem; font-weight: 700;
+            letter-spacing: -0.02em; line-height: 1.12;
+            margin-bottom: 1rem; color: var(--light-text);
+        }
+        .sec-title .grad {
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .sec-sub {
+            font-size: 1.05rem; color: var(--light-muted);
+            max-width: 580px; line-height: 1.7;
+        }
+
+        /* ── PROBLEM ── */
+        .problem { background: var(--light-bg); }
+
+        .problem-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 4rem; align-items: center; margin-top: 3.5rem;
+        }
+
+        .problem-list { display: flex; flex-direction: column; gap: 1.1rem; margin-top: 2rem; }
+
+        .prob-item {
+            display: flex; align-items: flex-start; gap: 1rem;
+            background: #fff8f8;
+            border: 1px solid rgba(220,38,38,0.12);
+            border-radius: 12px; padding: 1.1rem 1.2rem;
+            transition: all 0.3s ease;
+        }
+        .prob-item:hover { border-color: rgba(220,38,38,0.28); background: #fff1f1; transform: translateX(4px); }
+
+        .prob-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+        .prob-text h4 { font-size: 0.9rem; font-weight: 700; color: #7f1d1d; margin-bottom: 0.25rem; font-family: 'Manrope', sans-serif; }
+        .prob-text p { font-size: 0.82rem; color: #a16060; line-height: 1.5; }
+
+        .problem-callout {
+            background: var(--light-text); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px; padding: 2.5rem;
+            position: relative; overflow: hidden;
+        }
+        .problem-callout::before {
+            content: '"'; position: absolute;
+            top: -0.5rem; left: 1.5rem;
+            font-size: 8rem; font-family: 'Fraunces', serif;
+            color: rgba(59,130,246,0.1); line-height: 1;
+            pointer-events: none;
+        }
+        .callout-quote {
+            font-size: 1.35rem; font-weight: 600;
+            color: #e2e8f0; line-height: 1.5;
+            margin-bottom: 1.5rem; position: relative; z-index: 1;
+            font-family: 'Fraunces', serif;
+        }
+        .callout-stat { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .c-stat { text-align: center; }
+        .c-stat-num { font-size: 2rem; font-weight: 700; color: var(--blue-light); font-family: 'Fraunces', serif; }
+        .c-stat-label { font-size: 0.75rem; color: #94a3b8; }
+
+        /* ── SOLUTION ── */
+        .solution { background: var(--light-bg-3); }
+
+        .sol-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem; margin-top: 3.5rem;
+        }
+
+        .sol-card {
+            background: var(--light-card);
+            border: 1px solid var(--light-border);
+            border-radius: 16px; padding: 1.8rem;
+            transition: all 0.35s ease;
+            position: relative; overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+        .sol-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+            transform: scaleX(0); transform-origin: left;
+            transition: transform 0.35s ease;
+        }
+        .sol-card:hover::before { transform: scaleX(1); }
+        .sol-card:hover { transform: translateY(-6px); border-color: var(--light-border-bright); box-shadow: var(--shadow-hover); }
+
+        .sol-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: var(--light-bg-3);
+            border: 1px solid var(--light-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 1.1rem;
+        }
+        .sol-card h3 { font-size: 1rem; font-weight: 700; color: var(--light-text); margin-bottom: 0.5rem; font-family: 'Manrope', sans-serif; }
+        .sol-card p { font-size: 0.83rem; color: var(--light-muted); line-height: 1.6; }
+
+        /* ── HOW IT WORKS ── */
+        .how { background: var(--light-bg); }
+
+        .steps {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem; margin-top: 3.5rem;
+            position: relative;
+        }
+        .steps::before {
+            content: ''; position: absolute;
+            top: 2.2rem; left: 12%; right: 12%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--light-border-bright), var(--blue), var(--light-border-bright), transparent);
+            z-index: 0;
+        }
+
+        .step { text-align: center; position: relative; z-index: 1; }
+
+        .step-num {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--blue);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.2rem;
+            font-family: 'Fraunces', serif;
+            font-weight: 700; font-size: 1rem; color: var(--blue);
+            position: relative; z-index: 2;
+            box-shadow: 0 0 0 6px rgba(37,99,235,0.08);
+        }
+
+        .step-icon { font-size: 1.6rem; margin-bottom: 0.8rem; }
+        .step h3 { font-size: 0.95rem; font-weight: 700; color: var(--light-text); margin-bottom: 0.5rem; font-family: 'Manrope', sans-serif; }
+        .step p { font-size: 0.8rem; color: var(--light-muted); line-height: 1.6; }
+
+        /* ── PRICING ── */
+        .pricing { background: var(--light-bg-4); }
+
+        .pricing-note {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(5,150,105,0.08);
+            border: 1px solid rgba(5,150,105,0.2);
+            color: var(--green); padding: 0.5rem 1.2rem;
+            border-radius: 50px; font-size: 0.82rem; font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem; margin-top: 3.5rem; align-items: start;
+        }
+
+        .price-card {
+            background: var(--light-card);
+            border: 1px solid var(--light-border);
+            border-radius: 20px; padding: 2rem;
+            transition: all 0.35s ease;
+            position: relative;
+            box-shadow: var(--shadow-card);
+        }
+
+        .price-card:hover { transform: translateY(-6px); border-color: var(--light-border-bright); box-shadow: var(--shadow-hover); }
+
+        .price-card.featured {
+            background: linear-gradient(160deg, #fff 0%, #eff6ff 100%);
+            border-color: rgba(37,99,235,0.35);
+            box-shadow: 0 0 0 1px rgba(37,99,235,0.15), 0 8px 40px rgba(37,99,235,0.12);
+        }
+
+        .price-card.featured:hover { box-shadow: 0 0 0 1px rgba(37,99,235,0.35), 0 16px 56px rgba(37,99,235,0.18); }
+
+        .featured-tag {
+            position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            color: #fff; font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            padding: 0.3rem 1rem; border-radius: 0 0 10px 10px;
+        }
+
+        .price-plan { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.5rem; }
+        .price-name { font-size: 1.4rem; font-weight: 700; color: var(--light-text); margin-bottom: 0.3rem; }
+        .price-desc { font-size: 0.8rem; color: var(--light-muted); margin-bottom: 1.5rem; line-height: 1.5; }
+
+        .price-amount { display: flex; align-items: baseline; gap: 0.3rem; margin-bottom: 0.3rem; }
+        .price-currency { font-size: 1.2rem; font-weight: 700; color: var(--light-muted); }
+        .price-num { font-size: 2.6rem; font-weight: 700; color: var(--light-text); font-family: 'Fraunces', serif; line-height: 1; }
+        .price-per { font-size: 0.82rem; color: var(--light-muted); }
+        .price-yearly { font-size: 0.75rem; color: var(--green); margin-bottom: 1.5rem; font-weight: 600; }
+
+        .price-divider { height: 1px; background: var(--light-border); margin: 1.5rem 0; }
+
+        .price-spec {
+            background: var(--light-bg-3);
+            border: 1px solid var(--light-border);
+            border-radius: 10px; padding: 0.9rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .spec-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; }
+        .spec-row:not(:last-child) { margin-bottom: 0.5rem; }
+        .spec-key { color: var(--light-muted); }
+        .spec-val { color: var(--light-text-2); font-weight: 600; }
+
+        .price-features { list-style: none; margin-bottom: 1.8rem; }
+        .price-features li {
+            display: flex; align-items: flex-start; gap: 0.6rem;
+            font-size: 0.82rem; color: var(--light-muted);
+            margin-bottom: 0.65rem; line-height: 1.4;
+        }
+        .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+        .price-btn {
+            display: block; text-align: center;
+            padding: 0.8rem; border-radius: 10px;
+            font-weight: 700; font-size: 0.88rem;
+            text-decoration: none; transition: all 0.25s;
+            cursor: pointer; border: none; width: 100%;
+        }
+        .price-btn.outline {
+            background: transparent; color: var(--blue);
+            border: 1.5px solid var(--light-border-bright);
+        }
+        .price-btn.outline:hover { background: var(--light-bg-3); border-color: var(--blue); }
+        .price-btn.solid {
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            color: #fff; box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+        }
+        .price-btn.solid:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(37,99,235,0.45); }
+
+        .pricing-footer {
+            text-align: center; margin-top: 2rem;
+            font-size: 0.82rem; color: var(--light-muted);
+        }
+        .pricing-footer a { color: var(--blue); text-decoration: none; font-weight: 600; }
+
+        /* ── SECURITY ── */
+        .security { background: var(--light-bg); }
+
+        .sec-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 4rem; align-items: center; margin-top: 3.5rem;
+        }
+
+        .security-items { display: flex; flex-direction: column; gap: 1rem; }
+
+        .sec-item {
+            display: flex; gap: 1rem;
+            background: #fff; border: 1px solid var(--light-border);
+            border-radius: 14px; padding: 1.2rem 1.4rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-card);
+        }
+        .sec-item:hover { border-color: var(--light-border-bright); transform: translateX(4px); box-shadow: var(--shadow-hover); }
+        .sec-item-icon { font-size: 1.4rem; flex-shrink: 0; }
+        .sec-item h4 { font-size: 0.9rem; font-weight: 700; color: var(--light-text); margin-bottom: 0.25rem; font-family: 'Manrope', sans-serif; }
+        .sec-item p { font-size: 0.8rem; color: var(--light-muted); line-height: 1.5; }
+
+        .security-visual {
+            background: var(--light-text); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px; padding: 2.5rem;
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .sec-shield { font-size: 5rem; margin-bottom: 1.5rem; display: block; animation: shieldPulse 3s ease-in-out infinite; }
+        .sec-vis-title { font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; font-family: 'Fraunces', serif; }
+        .sec-vis-sub { font-size: 0.85rem; color: #94a3b8; margin-bottom: 2rem; }
+        .sec-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+        .sec-tag {
+            background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+            color: #93c5fd; padding: 0.3rem 0.8rem;
+            border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+        }
+
+        /* ── USE CASES ── */
+        .usecases { background: var(--light-bg-3); }
+
+        .uc-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem; margin-top: 3.5rem;
+        }
+
+        .uc-card {
+            background: var(--light-card); border: 1px solid var(--light-border);
+            border-radius: 16px; padding: 1.8rem;
+            transition: all 0.35s ease; cursor: default;
+            box-shadow: var(--shadow-card);
+        }
+        .uc-card:hover { transform: translateY(-5px); border-color: var(--light-border-bright); box-shadow: var(--shadow-hover); }
+        .uc-emoji { font-size: 2rem; margin-bottom: 1rem; display: block; }
+        .uc-card h3 { font-size: 1rem; font-weight: 700; color: var(--light-text); margin-bottom: 0.5rem; font-family: 'Manrope', sans-serif; }
+        .uc-card p { font-size: 0.82rem; color: var(--light-muted); line-height: 1.6; }
+
+        /* ── FAQ ── */
+        .faq { background: var(--light-bg); }
+
+        .faq-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1rem; margin-top: 3.5rem;
+        }
+
+        .faq-item {
+            background: #fff; border: 1px solid var(--light-border);
+            border-radius: 14px; overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        .faq-q {
+            padding: 1.2rem 1.4rem;
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 1rem;
+            cursor: pointer; transition: background 0.2s;
+            font-weight: 600; font-size: 0.88rem; color: var(--light-text-2);
+            font-family: 'Manrope', sans-serif;
+        }
+        .faq-q:hover { background: var(--light-bg-3); }
+
+        .faq-arrow {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: var(--light-bg-3); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 0.7rem; flex-shrink: 0;
+            transition: all 0.3s; color: var(--blue);
+        }
+        .faq-item.open .faq-arrow { background: var(--blue); color: #fff; transform: rotate(180deg); }
+
+        .faq-a {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+            font-size: 0.82rem; color: var(--light-muted); line-height: 1.7;
+            padding: 0 1.4rem;
+        }
+        .faq-item.open .faq-a { max-height: 200px; padding: 0 1.4rem 1.2rem; }
+
+        /* ── CTA ── */
+        .cta-final {
+            background: var(--light-text);
+            position: relative; overflow: hidden; padding: 7rem 0;
+        }
+        .cta-final::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(37,99,235,0.12) 0%, transparent 70%);
+        }
+        .cta-inner { text-align: center; position: relative; z-index: 2; max-width: 680px; margin: 0 auto; }
+        .cta-final h2 { font-size: 3.2rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 1.2rem; }
+        .cta-final h2 .grad {
+            background: linear-gradient(135deg, var(--blue-light), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .cta-final p { font-size: 1.05rem; color: #94a3b8; margin-bottom: 2.5rem; line-height: 1.7; }
+        .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        .btn-ghost-light {
+            background: rgba(255,255,255,0.08); color: #e2e8f0;
+            padding: 0.8rem 1.8rem; border-radius: 10px;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; display: inline-flex;
+            align-items: center; gap: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.25s;
+        }
+        .btn-ghost-light:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+
+        /* ── FOOTER ── */
+        footer {
+            background: #030810;
+            border-top: 1px solid var(--border);
+            padding: 3.5rem 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid; grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 3rem; margin-bottom: 2.5rem;
+        }
+
+        .footer-brand .logo { font-size: 1.4rem; margin-bottom: 0.8rem; display: block; }
+        .footer-brand p { font-size: 0.82rem; color: #94a3b8; line-height: 1.6; max-width: 260px; }
+
+        .footer-col h4 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #475569; margin-bottom: 1rem; font-family: 'Manrope', sans-serif; }
+        .footer-col ul { list-style: none; }
+        .footer-col li { margin-bottom: 0.6rem; }
+        .footer-col a { font-size: 0.83rem; color: #94a3b8; text-decoration: none; transition: color 0.2s; }
+        .footer-col a:hover { color: var(--blue-light); }
+
+        footer {
+            background: var(--light-text);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 3.5rem 0 2rem;
         }
 
         .footer-bottom {
-            border-top: 1px solid #334155;
-            padding-top: 2rem;
-            text-align: center;
-            color: #64748b;
-        }
-
-        /* Powered-by platform strip */
-        .hero-powered {
-            margin-top: 2.2rem;
-            animation: fadeInUp 0.9s ease 0.65s both;
-        }
-
-        .powered-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #475569;
-            margin-bottom: 0.8rem;
-        }
-
-        .powered-platforms {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .platform-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 10px;
-            padding: 0.5rem 1rem;
-            color: #cbd5e1;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: default;
-        }
-
-        .platform-badge .pb-icon {
-            font-size: 1.1rem;
-        }
-
-        .platform-sep {
-            color: #334155;
-            font-size: 0.9rem;
-        }
-
-        /* Messenger bar */
-        .hero-messenger {
-            margin-top: 1.2rem;
-            padding-top: 1.2rem;
             border-top: 1px solid rgba(255,255,255,0.07);
-            animation: fadeInUp 0.9s ease 0.8s both;
-            padding-bottom: 3rem;
+            padding-top: 1.5rem;
+            display: flex; align-items: flex-start;
+            justify-content: space-between; gap: 1rem; flex-wrap: wrap;
         }
 
-        .messenger-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #475569;
-            margin-bottom: 0.9rem;
+        .footer-copy { font-size: 0.78rem; color: #334155; }
+
+        .disclaimer {
+            font-size: 0.7rem; color: #334155;
+            max-width: 600px; line-height: 1.5; text-align: right;
         }
 
-        .messenger-apps {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            flex-wrap: wrap;
-        }
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeLeft { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes gridDrift { 0% { background-position: 0 0; } 100% { background-position: 52px 52px; } }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+        @keyframes cardFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes fillUp { from { width: 0; } }
+        @keyframes aiPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(45,126,247,0.4); } 50% { box-shadow: 0 0 0 8px rgba(45,126,247,0); } }
+        @keyframes shieldPulse { 0%,100% { filter: drop-shadow(0 0 12px rgba(0,229,160,0.3)); } 50% { filter: drop-shadow(0 0 28px rgba(0,229,160,0.6)); } }
 
-        .messenger-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.45rem 1rem;
-            border-radius: 50px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: default;
-            border: 1px solid transparent;
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
         }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
 
-        .msg-whatsapp {
-            background: rgba(37,211,102,0.12);
-            border-color: rgba(37,211,102,0.3);
-            color: #4ade80;
-        }
-        .msg-whatsapp:hover { background: rgba(37,211,102,0.22); border-color: rgba(37,211,102,0.6); }
-
-        .msg-telegram {
-            background: rgba(0,136,204,0.12);
-            border-color: rgba(0,136,204,0.3);
-            color: #38bdf8;
-        }
-        .msg-telegram:hover { background: rgba(0,136,204,0.22); border-color: rgba(0,136,204,0.6); }
-
-        .msg-slack {
-            background: rgba(224,30,90,0.1);
-            border-color: rgba(224,30,90,0.25);
-            color: #f472b6;
-        }
-        .msg-slack:hover { background: rgba(224,30,90,0.2); border-color: rgba(224,30,90,0.5); }
-
-        .msg-email {
-            background: rgba(251,191,36,0.1);
-            border-color: rgba(251,191,36,0.25);
-            color: #fbbf24;
-        }
-        .msg-email:hover { background: rgba(251,191,36,0.2); border-color: rgba(251,191,36,0.5); }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInRight {
-            from { opacity: 0; transform: translateY(-50%) translateX(60px); }
-            to { opacity: 1; transform: translateY(-50%) translateX(0); }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
-            50% { transform: translateY(-30px) rotate(180deg); opacity: 1; }
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes gridDrift {
-            0% { background-position: 0 0; }
-            100% { background-position: 48px 48px; }
-        }
-
-        @keyframes blobPulse {
-            0% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        @keyframes cardFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-        }
-
-        @keyframes aiPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
-        }
-
-        @keyframes fillAnimate {
-            from { width: 0; }
-        }
-
-        /* Responsive */
+        /* ── RESPONSIVE ── */
         @media (max-width: 1024px) {
-            .hero-visual { display: none; }
-            .hero-content { max-width: 100%; }
+            .hero-inner { grid-template-columns: 1fr; }
+            .hero-right { display: none; }
+            .problem-grid, .sec-grid { grid-template-columns: 1fr; }
+            .sol-grid, .uc-grid { grid-template-columns: repeat(2, 1fr); }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+            .steps { grid-template-columns: repeat(2, 1fr); }
+            .steps::before { display: none; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
         }
 
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.8rem; }
+            .sec-title { font-size: 2.2rem; }
             .nav-links { display: none; }
-            .hero-buttons, .cta-buttons { flex-direction: column; align-items: flex-start; }
-            .features-grid, .platform-grid { grid-template-columns: 1fr; }
-            .footer-content { grid-template-columns: 1fr; text-align: center; }
-            .section-title { font-size: 2.5rem; }
-            .cta-content h2 { font-size: 2.5rem; }
-        }
-
-        @media (max-width: 480px) {
-            .hero h1 { font-size: 2.2rem; }
-            .section-title { font-size: 2rem; }
-            .cta-content h2 { font-size: 2rem; }
+            .sol-grid, .uc-grid, .faq-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .trust-inner { justify-content: flex-start; }
+            .footer-bottom { flex-direction: column; }
+            .disclaimer { text-align: left; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="container">
-            <div class="logo">AADI CLOUD</div>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#platform">Platform</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <a href="#contact" class="cta-button">Get Started</a>
-        </nav>
-    </header>
 
-    <main>
-        <!-- ===================== UPDATED HERO SECTION ===================== -->
-        <section class="hero">
-            <div class="container">
-                <div class="hero-content">
+<!-- ── HEADER ── -->
+<header>
+    <nav class="container">
+        <div class="logo">AADI CLOUD</div>
+        <ul class="nav-links">
+            <li><a href="#problem">Why Private</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#contact" class="nav-cta">Get Started →</a>
+    </nav>
+</header>
 
-                    <div class="hero-badge">
-                        <span class="dot"></span>
-                        Private VPS AI Hosting — Now Available
+<!-- ── HERO ── -->
+<section class="hero">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="container">
+        <div class="hero-inner">
+            <div class="hero-left">
+                <div class="hero-badge"><span class="badge-dot"></span> Private VPS AI Hosting — Now Available</div>
+                <h1>Your Personal AI.<br><span class="grad">Your Private Server.</span></h1>
+                <p class="hero-sub">
+                    Want to run your own AI — ChatGPT-style, but <strong>completely private</strong>?
+                    We set up, host, and manage your personal AI on a dedicated VPS.
+                    No data leaks. No subscriptions to Big Tech. No shared infrastructure.
+                    <strong>Just your AI, on your terms.</strong>
+                </p>
+                <div class="hero-pills">
+                    <span class="pill">🖥️ Dedicated VPS Setup</span>
+                    <span class="pill">🔒 100% Private & Secure</span>
+                    <span class="pill">⚡ Always-On</span>
+                    <span class="pill">💰 No Per-Token Charges</span>
+                </div>
+                <div class="hero-btns">
+                    <a href="#pricing" class="btn-primary">🚀 Get My Private AI</a>
+                    <a href="#how" class="btn-ghost">See How It Works →</a>
+                </div>
+                <div class="powered-row">
+                    <div class="powered-label">⚙️ Powered by</div>
+                    <div class="powered-badges">
+                        <span class="p-badge">🦙 Ollama</span>
+                        <span class="p-sep">+</span>
+                        <span class="p-badge">🦞 OpenClaw</span>
+                        <span class="p-sep">+</span>
+                        <span class="p-badge">🧠 LLaMA · Mistral · Phi-3</span>
                     </div>
-
-                    <h1>Your Personal AI.<br><span class="highlight">Your Private Server.</span></h1>
-
-                    <p class="hero-tagline">
-                        Want to run your own AI — ChatGPT-style, but <strong>completely private</strong>?
-                        We set up, host, and manage your personal AI on a dedicated VPS.
-                        No data leaks. No subscriptions. No shared infrastructure.
-                        <strong>Just your AI, on your terms.</strong>
-                    </p>
-
-                    <!-- Feature pills -->
-                    <div class="hero-pills">
-                        <div class="hero-pill"><span class="pill-icon">🖥️</span> Dedicated VPS Setup</div>
-                        <div class="hero-pill"><span class="pill-icon">🔒</span> 100% Private & Secure</div>
-                        <div class="hero-pill"><span class="pill-icon">🤖</span> Open-Source LLMs (LLaMA, Mistral…)</div>
-                        <div class="hero-pill"><span class="pill-icon">⚡</span> Always-On, Lightning Fast</div>
-                        <div class="hero-pill"><span class="pill-icon">💰</span> No Per-Token Charges</div>
+                </div>
+                <div class="ai-row">
+                    <div class="ai-label">💬 Your AI is available on</div>
+                    <div class="ai-badges">
+                        <span class="ai-badge ai-wa">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                            WhatsApp
+                        </span>
+                        <span class="ai-badge ai-tg">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                            Telegram
+                        </span>
+                        <span class="ai-badge ai-sl">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+                            Slack
+                        </span>
+                        <span class="ai-badge ai-em">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            Email
+                        </span>
                     </div>
-
-                    <div class="hero-buttons">
-                        <a href="#contact" class="btn-primary">🚀 Get My Private AI</a>
-                        <a href="#features" class="btn-secondary">See How It Works →</a>
-                    </div>
-
-                    <!-- Powered-by platforms -->
-                    <div class="hero-powered">
-                        <div class="powered-label">⚙️ Powered by</div>
-                        <div class="powered-platforms">
-                            <span class="platform-badge">
-                                <span class="pb-icon">🦙</span> Ollama
-                            </span>
-                            <span class="platform-sep">+</span>
-                            <span class="platform-badge">
-                                <span class="pb-icon">🦞</span> OpenClaw
-                            </span>
-                            <span class="platform-sep">+</span>
-                            <span class="platform-badge">
-                                <span class="pb-icon">🧠</span> LLaMA · Mistral · Phi-3
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Messenger AI availability bar -->
-                    <div class="hero-messenger">
-                        <div class="messenger-label">💬 Your AI is available on</div>
-                        <div class="messenger-apps">
-                            <span class="messenger-btn msg-whatsapp">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                                WhatsApp
-                            </span>
-                            <span class="messenger-btn msg-telegram">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                                Telegram
-                            </span>
-                            <span class="messenger-btn msg-slack">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
-                                Slack
-                            </span>
-                            <span class="messenger-btn msg-email">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                                Email
-                            </span>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
-            <!-- Floating server status card -->
-            <div class="hero-visual">
+            <!-- Server Status Card -->
+            <div class="hero-right">
                 <div class="server-card">
-                    <div class="server-header">
-                        <div class="server-dots">
-                            <span class="dot-red"></span>
-                            <span class="dot-yellow"></span>
-                            <span class="dot-green"></span>
-                        </div>
-                        <span class="server-title">aadi-vps-private-ai.server</span>
+                    <div class="sc-header">
+                        <div class="sc-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
+                        <span class="sc-title">aadi-vps-private-ai.server</span>
                     </div>
-
-                    <div class="server-stat">
-                        <span class="stat-label">CPU Usage</span>
-                        <div class="stat-bar"><div class="stat-fill fill-blue"></div></div>
-                        <span class="stat-value">72%</span>
+                    <div class="sc-stat">
+                        <div class="sc-stat-header"><span class="sc-stat-label">CPU Usage</span><span class="sc-stat-val">68%</span></div>
+                        <div class="sc-bar"><div class="sc-fill sf-blue"></div></div>
                     </div>
-                    <div class="server-stat">
-                        <span class="stat-label">RAM Usage</span>
-                        <div class="stat-bar"><div class="stat-fill fill-purple"></div></div>
-                        <span class="stat-value">45%</span>
+                    <div class="sc-stat">
+                        <div class="sc-stat-header"><span class="sc-stat-label">RAM Usage</span><span class="sc-stat-val">42%</span></div>
+                        <div class="sc-bar"><div class="sc-fill sf-purple"></div></div>
                     </div>
-                    <div class="server-stat">
-                        <span class="stat-label">Uptime</span>
-                        <div class="stat-bar"><div class="stat-fill fill-cyan"></div></div>
-                        <span class="stat-value">99.9%</span>
+                    <div class="sc-stat">
+                        <div class="sc-stat-header"><span class="sc-stat-label">Uptime</span><span class="sc-stat-val">99.9%</span></div>
+                        <div class="sc-bar"><div class="sc-fill sf-cyan"></div></div>
                     </div>
-
-                    <div class="server-ai-badge">
-                        <div class="ai-pulse">🤖</div>
-                        <div class="ai-text">
-                            <div class="ai-model">Mistral 7B · Your Private Instance</div>
-                            <div class="ai-status">Running securely on your VPS</div>
+                    <div class="sc-ai">
+                        <div class="sc-ai-icon">🤖</div>
+                        <div>
+                            <div class="sc-ai-model">Mistral 7B · Your Private Instance</div>
+                            <div class="sc-ai-status">Running securely on your VPS</div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Particles -->
-            <div class="particle particle-1"></div>
-            <div class="particle particle-2"></div>
-            <div class="particle particle-3"></div>
-            <div class="particle particle-4"></div>
-        </section>
-        <!-- ===================== END UPDATED HERO ===================== -->
-
-        <section id="features" class="features">
-            <div class="container">
-                <h2 class="section-title">Core Benefits</h2>
-                <p class="section-subtitle">
-                    Empower your organization with cutting-edge AI technology that prioritizes security, 
-                    cost-efficiency, and enterprise-grade reliability.
-                </p>
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">🔒</div>
-                        <h3>Data Security</h3>
-                        <p>Keep everything localized and secure. No cloud lock-in, no vendor surveillance. Your data stays in your environment, under your control with military-grade encryption and compliance standards.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">💰</div>
-                        <h3>Cost Reduction</h3>
-                        <p>Significantly reduce AI operating costs using optimized open-source LLMs. No per-token charges or usage limits. Scale your AI operations without breaking the budget.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🏢</div>
-                        <h3>Enterprise Ready</h3>
-                        <p>Complete software platform designed for enterprise deployment with role-based access, comprehensive auditing, compliance features, and seamless integration with existing infrastructure.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="platform" class="platform-features">
-            <div class="container">
-                <h2 class="section-title">Platform Features</h2>
-                <p class="section-subtitle">
-                    A comprehensive suite of tools and capabilities designed to transform how your organization 
-                    leverages artificial intelligence.
-                </p>
-                <div class="platform-grid">
-                    <div class="platform-card">
-                        <h3>Unified AI Chat Hub</h3>
-                        <ul>
-                            <li>Organize all employee chat history and conversations</li>
-                            <li>Clean UI for interacting with multiple LLMs</li>
-                            <li>One platform for all internal AI tasks</li>
-                            <li>Code generation, content creation, research tools</li>
-                        </ul>
-                    </div>
-                    <div class="platform-card">
-                        <h3>User & Access Management</h3>
-                        <ul>
-                            <li>Admin controls for user creation and management</li>
-                            <li>Role-based permissions and access controls</li>
-                            <li>Secure authentication systems</li>
-                            <li>Activity tracking and monitoring</li>
-                        </ul>
-                    </div>
-                    <div class="platform-card">
-                        <h3>Internal Knowledge Management</h3>
-                        <ul>
-                            <li>Centralized repository for organizational knowledge</li>
-                            <li>Contextual AI responses from company data</li>
-                            <li>Auto-indexing and embedding of internal docs</li>
-                            <li>Secure document processing and retrieval</li>
-                        </ul>
-                    </div>
-                    <div class="platform-card">
-                        <h3>Model Fusion Technology</h3>
-                        <ul>
-                            <li>Integrate multiple open-source LLMs</li>
-                            <li>Ensemble logic to reduce hallucinations</li>
-                            <li>Consensus-based response generation</li>
-                            <li>Support for Mixtral, LLaMA, Phi-3, and more</li>
-                        </ul>
-                    </div>
-                    <div class="platform-card">
-                        <h3>Auditing & Logging</h3>
-                        <ul>
-                            <li>Track and store all user interactions</li>
-                            <li>Compliance and security audit trails</li>
-                            <li>Exportable logs and admin dashboards</li>
-                            <li>Real-time monitoring and alerts</li>
-                        </ul>
-                    </div>
-                    <div class="platform-card">
-                        <h3>Highly Customizable</h3>
-                        <ul>
-                            <li>White-label branding options</li>
-                            <li>Modular UI and backend architecture</li>
-                            <li>Custom tools and domain-specific modules</li>
-                            <li>Compatible with existing data infrastructure</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="services" class="services">
-            <div class="container">
-                <h2 class="section-title">Full Service Offering</h2>
-                <p class="section-subtitle">
-                    End-to-end solutions from consultation to deployment and ongoing support, 
-                    ensuring your AI transformation is seamless and successful.
-                </p>
-                <div class="services-list">
-                    <div class="service-item">
-                        <h4>Infrastructure & Data Localization</h4>
-                        <p>Complete on-premise deployment with secure data handling and infrastructure setup tailored to your organization's specific requirements.</p>
-                    </div>
-                    <div class="service-item">
-                        <h4>Open-Source LLM Integration</h4>
-                        <p>Expert integration of the latest open-source language models optimized for your use case with performance tuning and optimization.</p>
-                    </div>
-                    <div class="service-item">
-                        <h4>Platform Licensing & Deployment</h4>
-                        <p>Flexible licensing options with professional deployment and configuration services, ensuring rapid time-to-value.</p>
-                    </div>
-                    <div class="service-item">
-                        <h4>Customization & Workflow Integration</h4>
-                        <p>Tailored solutions that integrate seamlessly with your existing workflows and systems, maximizing adoption and efficiency.</p>
-                    </div>
-                    <div class="service-item">
-                        <h4>Support, Monitoring & Maintenance</h4>
-                        <p>Ongoing support with proactive monitoring, updates, and maintenance services to ensure optimal performance and security.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="cta-section" id="contact">
-            <div class="container">
-                <div class="cta-content">
-                    <h2>Ready to Take Control?</h2>
-                    <p>
-                        We help you take control of your data and your intelligence—on your terms. 
-                        Our all-in-one platform brings your internal knowledge, AI capabilities, and data security 
-                        into one unified, private environment. No cloud lock-in. No vendor surveillance. 
-                        Just pure performance, powered by open-source innovation.
-                    </p>
-                    <div class="cta-buttons">
-                        <a href="mailto:contact@aadicloud.com" class="cta-button-white">Schedule Consultation</a>
-                        <a href="tel:+912249638603" class="cta-button-outline">Call Now</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>📍 Location</h3>
-                    <p>AADI CLOUD Headquarters</p>
-                    <p>210, Anant Laxmi Chambers<br>
-                    B-Cabin, Thane(w)<br>
-                    Mumbai - 400601</p>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>📞 Contact Details</h3>
-                    <div class="contact-item">
-                        <span class="contact-icon">📧</span>
-                        <a href="mailto:contact@aadicloud.com">contact@aadicloud.com</a>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-icon">📞</span>
-                        <a href="tel:+912249638603">+91 22 49638603</a>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-icon">💼</span>
-                        <a href="mailto:sales@aadicloud.com">sales@aadicloud.com</a>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-icon">🛠️</span>
-                        <a href="mailto:support@aadicloud.com">support@aadicloud.com</a>
-                    </div>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>🔗 Quick Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="#features">✨ Core Benefits</a></li>
-                        <li><a href="#platform">🚀 Platform Features</a></li>
-                        <li><a href="#services">🔧 Services</a></li>
-                        <li><a href="#contact">📞 Get Started</a></li>
-                        <li><a href="mailto:contact@aadicloud.com">💼 Request Demo</a></li>
-                        <li><a href="#security">🔒 Security & Compliance</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2025 AADI CLOUD. All rights reserved. | Your Personal AI. Your Private Server.</p>
             </div>
         </div>
-    </footer>
+    </div>
+</section>
 
-    <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
+<!-- ── TRUST BAR ── -->
+<div class="trust-bar">
+    <div class="container">
+        <div class="trust-inner">
+            <div class="trust-item"><span class="t-icon">🚀</span><span><strong>Setup in &lt;24 hrs</strong></span></div>
+            <div class="trust-item"><span class="t-icon">🔒</span><span><strong>100%</strong> Data on YOUR server</span></div>
+            <div class="trust-item"><span class="t-icon">⚡</span><span><strong>99.9%</strong> Uptime SLA</span></div>
+            <div class="trust-item"><span class="t-icon">💸</span><span>Starting at <strong>₹999/mo</strong></span></div>
+            <div class="trust-item"><span class="t-icon">🛡️</span><span>Zero third-party data access</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ── PROBLEM ── -->
+<section class="problem" id="problem">
+    <div class="container">
+        <div class="problem-grid">
+            <div>
+                <div class="sec-label reveal">The Problem</div>
+                <h2 class="sec-title reveal">Every message you send to a public AI is a risk you're taking.</h2>
+                <p class="sec-sub reveal">Public AI tools are convenient — but your confidential data, business strategies, and personal queries are being processed on someone else's servers. Every. Single. Time.</p>
+                <div class="problem-list">
+                    <div class="prob-item reveal">
+                        <span class="prob-icon">👁️</span>
+                        <div class="prob-text">
+                            <h4>Your prompts are being logged</h4>
+                            <p>Every query you send to ChatGPT or Google AI is stored, analyzed, and potentially used to train future models.</p>
+                        </div>
+                    </div>
+                    <div class="prob-item reveal">
+                        <span class="prob-icon">💸</span>
+                        <div class="prob-text">
+                            <h4>Subscription costs keep rising</h4>
+                            <p>$20/month per user quickly becomes ₹50,000+/month for a small team — with no end in sight.</p>
+                        </div>
+                    </div>
+                    <div class="prob-item reveal">
+                        <span class="prob-icon">🔗</span>
+                        <div class="prob-text">
+                            <h4>Vendor lock-in and outages</h4>
+                            <p>When OpenAI goes down, your entire team stops. You're one outage away from a productivity crisis.</p>
+                        </div>
+                    </div>
+                    <div class="prob-item reveal">
+                        <span class="prob-icon">⚠️</span>
+                        <div class="prob-text">
+                            <h4>Compliance & legal exposure</h4>
+                            <p>Sending sensitive client or business data to third-party AI services can violate GDPR, IT Act 2000, and NDA obligations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="problem-callout reveal">
+                <div class="callout-quote">"The AI knows your business better than you do — and it's not even yours."</div>
+                <div class="callout-stat">
+                    <div class="c-stat"><div class="c-stat-num">73%</div><div class="c-stat-label">of businesses unknowingly share confidential data with public AI tools</div></div>
+                    <div class="c-stat"><div class="c-stat-num">4x</div><div class="c-stat-label">higher cost of cloud AI vs self-hosted over 12 months</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── SOLUTION ── -->
+<section class="solution" id="solution">
+    <div class="container">
+        <div style="text-align:center;">
+            <div class="sec-label reveal" style="justify-content:center;">The Solution</div>
+            <h2 class="sec-title reveal" style="max-width:600px;margin:0 auto 1rem;">Your AI. <span class="grad">Your Rules.</span> Your Server.</h2>
+            <p class="sec-sub reveal" style="margin:0 auto;">We set up a private AI instance on your dedicated VPS — fully secured, always online, and completely yours. Nobody else can see what you ask it.</p>
+        </div>
+        <div class="sol-grid">
+            <div class="sol-card reveal">
+                <div class="sol-icon">🔒</div>
+                <h3>Zero Data Exposure</h3>
+                <p>Your conversations never leave your server. No third party, no cloud provider, no logs on our end.</p>
+            </div>
+            <div class="sol-card reveal">
+                <div class="sol-icon">💰</div>
+                <h3>Pay Once, Run Forever</h3>
+                <p>A flat monthly VPS fee. No per-token billing, no API rate limits, no surprise charges as you scale.</p>
+            </div>
+            <div class="sol-card reveal">
+                <div class="sol-icon">⚡</div>
+                <h3>Always On, No Limits</h3>
+                <p>Your server runs 24/7. No rate limits, no queues, no degraded service during peak hours.</p>
+            </div>
+            <div class="sol-card reveal">
+                <div class="sol-icon">🤖</div>
+                <h3>Best-in-Class Open Models</h3>
+                <p>LLaMA 3, Mistral, Phi-3, Gemini API — choose the model that fits your use case, or mix and match.</p>
+            </div>
+            <div class="sol-card reveal">
+                <div class="sol-icon">🛠️</div>
+                <h3>We Handle Everything</h3>
+                <p>Server setup, model installation, security hardening, channel integration — we do it all for you.</p>
+            </div>
+            <div class="sol-card reveal">
+                <div class="sol-icon">📱</div>
+                <h3>Chat From Anywhere</h3>
+                <p>Your AI is accessible via WhatsApp, Telegram, Slack, or Email — wherever you already work.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how" id="how">
+    <div class="container">
+        <div style="text-align:center;">
+            <div class="sec-label reveal" style="justify-content:center;">How It Works</div>
+            <h2 class="sec-title reveal">From zero to your own private AI<br><span class="grad">in less than 24 hours.</span></h2>
+            <p class="sec-sub reveal" style="margin:0 auto;">No technical knowledge needed. We handle the entire setup — you just start chatting.</p>
+        </div>
+        <div class="steps">
+            <div class="step reveal">
+                <div class="step-num">01</div>
+                <div class="step-icon">📋</div>
+                <h3>Choose Your Plan</h3>
+                <p>Pick the VPS specification that matches your usage — individual, team, or enterprise scale.</p>
+            </div>
+            <div class="step reveal">
+                <div class="step-num">02</div>
+                <div class="step-icon">⚙️</div>
+                <h3>We Set It All Up</h3>
+                <p>We provision your VPS, install Ollama + OpenClaw, configure your chosen LLM, and harden security.</p>
+            </div>
+            <div class="step reveal">
+                <div class="step-num">03</div>
+                <div class="step-icon">🔗</div>
+                <h3>Connect Your Apps</h3>
+                <p>We wire up your AI to WhatsApp, Telegram, Slack, or Email — whichever channels you prefer.</p>
+            </div>
+            <div class="step reveal">
+                <div class="step-num">04</div>
+                <div class="step-icon">🚀</div>
+                <h3>Go Live & Own It</h3>
+                <p>Your private AI is live. Chat with it from your favourite app — fully private, fully yours.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section class="pricing" id="pricing">
+    <div class="container">
+        <div style="text-align:center;">
+            <div class="sec-label reveal" style="justify-content:center;">Pricing</div>
+            <h2 class="sec-title reveal">Simple, <span class="grad">transparent pricing.</span><br>No surprises.</h2>
+            <p class="sec-sub reveal" style="margin:0 auto 0.8rem;">All plans include full setup, security hardening, and your data never leaving your server.</p>
+            <div class="pricing-note reveal">🎉 Get an additional 5% off on yearly plans or higher-tier upgrades</div>
+        </div>
+        <div class="pricing-grid">
+
+            <!-- Starter -->
+            <div class="price-card reveal">
+                <div class="price-plan">Starter</div>
+                <div class="price-name">Personal</div>
+                <div class="price-desc">Perfect for individuals, freelancers, and solo builders exploring private AI.</div>
+                <div class="price-amount">
+                    <span class="price-currency">₹</span>
+                    <span class="price-num">999</span>
+                    <span class="price-per">/ month</span>
+                </div>
+                <div class="price-yearly">₹11,389/yr with 5% yearly discount</div>
+                <div class="price-spec">
+                    <div class="spec-row"><span class="spec-key">vCPU</span><span class="spec-val">1 vCPU</span></div>
+                    <div class="spec-row"><span class="spec-key">RAM</span><span class="spec-val">2 GB</span></div>
+                    <div class="spec-row"><span class="spec-key">Storage</span><span class="spec-val">40 GB SSD</span></div>
+                </div>
+                <ul class="price-features">
+                    <li>Ollama + OpenClaw installation</li>
+                    <li>Mistral 7B or Phi-3 Mini model</li>
+                    <li>1 messaging channel integration</li>
+                    <li>SSL + firewall security setup</li>
+                    <li>Email support</li>
+                    <li>Full setup included</li>
+                </ul>
+                <a href="#contact" class="price-btn outline">Get Started</a>
+            </div>
+
+            <!-- Professional (Featured) -->
+            <div class="price-card featured reveal">
+                <div class="featured-tag">⭐ Most Popular</div>
+                <div class="price-plan">Professional</div>
+                <div class="price-name">Team</div>
+                <div class="price-desc">Ideal for small teams, businesses, and power users who need more capacity.</div>
+                <div class="price-amount">
+                    <span class="price-currency">₹</span>
+                    <span class="price-num">1,899</span>
+                    <span class="price-per">/ month</span>
+                </div>
+                <div class="price-yearly">₹21,629/yr with 5% yearly discount</div>
+                <div class="price-spec">
+                    <div class="spec-row"><span class="spec-key">vCPU</span><span class="spec-val">2 vCPU</span></div>
+                    <div class="spec-row"><span class="spec-key">RAM</span><span class="spec-val">4 GB</span></div>
+                    <div class="spec-row"><span class="spec-key">Storage</span><span class="spec-val">80 GB SSD</span></div>
+                </div>
+                <ul class="price-features">
+                    <li>Everything in Personal</li>
+                    <li>LLaMA 3 8B or Mistral 7B Instruct</li>
+                    <li>Up to 3 messaging channel integrations</li>
+                    <li>Custom AI persona & system prompt</li>
+                    <li>Advanced firewall + fail2ban + SSH hardening</li>
+                    <li>Priority email + chat support</li>
+                    <li>Monthly performance check-in</li>
+                </ul>
+                <a href="#contact" class="price-btn solid">Get Started →</a>
+            </div>
+
+            <!-- Enterprise -->
+            <div class="price-card reveal">
+                <div class="price-plan">Enterprise</div>
+                <div class="price-name">Business</div>
+                <div class="price-desc">For growing businesses needing high-performance AI with Gemini or custom model integration.</div>
+                <div class="price-amount">
+                    <span class="price-currency">₹</span>
+                    <span class="price-num">3,999</span>
+                    <span class="price-per">/ month</span>
+                </div>
+                <div class="price-yearly">₹45,589/yr with 5% yearly discount</div>
+                <div class="price-spec">
+                    <div class="spec-row"><span class="spec-key">vCPU</span><span class="spec-val">4 vCPU</span></div>
+                    <div class="spec-row"><span class="spec-key">RAM</span><span class="spec-val">8 GB</span></div>
+                    <div class="spec-row"><span class="spec-key">Storage</span><span class="spec-val">160 GB SSD</span></div>
+                </div>
+                <ul class="price-features">
+                    <li>Everything in Team</li>
+                    <li>LLaMA 3 70B, Mixtral, or Gemini API integration</li>
+                    <li>All messaging channel integrations</li>
+                    <li>Document & knowledge base ingestion (RAG)</li>
+                    <li>Dedicated setup engineer</li>
+                    <li>Priority 24/7 support</li>
+                    <li>Custom domain + white-label option</li>
+                    <li>Quarterly security audit</li>
+                </ul>
+                <a href="#contact" class="price-btn outline">Contact Us</a>
+            </div>
+
+        </div>
+        <div class="pricing-footer reveal">
+            Need something bigger or custom? <a href="#contact">Talk to us about a custom plan →</a>
+        </div>
+    </div>
+</section>
+
+<!-- ── SECURITY ── -->
+<section class="security" id="security">
+    <div class="container">
+        <div class="sec-grid">
+            <div>
+                <div class="sec-label reveal">Security & Privacy</div>
+                <h2 class="sec-title reveal">We don't just promise privacy.<br><span class="grad">We engineer it.</span></h2>
+                <p class="sec-sub reveal">Every server we deploy is hardened against intrusion, monitored continuously, and built on 100% open-source infrastructure — so you can verify every layer yourself.</p>
+                <div class="security-items" style="margin-top:2rem;">
+                    <div class="sec-item reveal">
+                        <span class="sec-item-icon">🔑</span>
+                        <div><h4>SSH Key Authentication Only</h4><p>No password-based access. Your server is locked down to key-based auth from day one.</p></div>
+                    </div>
+                    <div class="sec-item reveal">
+                        <span class="sec-item-icon">🧱</span>
+                        <div><h4>Firewall + Fail2Ban</h4><p>Automated intrusion detection blocks brute-force attacks before they become a threat.</p></div>
+                    </div>
+                    <div class="sec-item reveal">
+                        <span class="sec-item-icon">🌐</span>
+                        <div><h4>SSL Encryption End-to-End</h4><p>All traffic to and from your AI is encrypted in transit. No plain-text communication.</p></div>
+                    </div>
+                    <div class="sec-item reveal">
+                        <span class="sec-item-icon">📦</span>
+                        <div><h4>Open-Source Stack — Fully Auditable</h4><p>Ollama, OpenClaw, and your LLM are all open-source. No black boxes, no hidden code.</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="security-visual reveal">
+                <span class="sec-shield">🛡️</span>
+                <div class="sec-vis-title">Your Data Never Leaves</div>
+                <div class="sec-vis-sub">All AI processing happens on your dedicated VPS — not on our servers, not on OpenAI's, not anywhere else.</div>
+                <div class="sec-tags">
+                    <span class="sec-tag">GDPR Friendly</span>
+                    <span class="sec-tag">IT Act 2000</span>
+                    <span class="sec-tag">Zero Data Logging</span>
+                    <span class="sec-tag">Air-Gap Ready</span>
+                    <span class="sec-tag">No Vendor Surveillance</span>
+                    <span class="sec-tag">Open Source Stack</span>
+                    <span class="sec-tag">SSH Hardened</span>
+                    <span class="sec-tag">Regular Patches</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── USE CASES ── -->
+<section class="usecases" id="usecases">
+    <div class="container">
+        <div style="text-align:center;">
+            <div class="sec-label reveal" style="justify-content:center;">Use Cases</div>
+            <h2 class="sec-title reveal">One private AI.<br><span class="grad">Infinite possibilities.</span></h2>
+            <p class="sec-sub reveal" style="margin:0 auto;">Private AI isn't just for big tech. Here's who's already using it.</p>
+        </div>
+        <div class="uc-grid">
+            <div class="uc-card reveal">
+                <span class="uc-emoji">🏢</span>
+                <h3>Business Owners</h3>
+                <p>An AI that knows your SOPs, drafts emails in your tone, answers team questions, and never shares your strategy with a competitor.</p>
+            </div>
+            <div class="uc-card reveal">
+                <span class="uc-emoji">⚖️</span>
+                <h3>Legal & CA Firms</h3>
+                <p>Analyse confidential documents, draft contracts, and research case law — without sending a single client detail to the cloud.</p>
+            </div>
+            <div class="uc-card reveal">
+                <span class="uc-emoji">🏥</span>
+                <h3>Healthcare Professionals</h3>
+                <p>Patient queries, clinical note drafting, and medical research — handled by an AI that keeps everything on-premise and compliant.</p>
+            </div>
+            <div class="uc-card reveal">
+                <span class="uc-emoji">💻</span>
+                <h3>Developers & Freelancers</h3>
+                <p>A personal coding assistant that runs 24/7 on your own box, with no rate limits and no subscription fee per query.</p>
+            </div>
+            <div class="uc-card reveal">
+                <span class="uc-emoji">🎬</span>
+                <h3>Content Creators</h3>
+                <p>Train your AI on your writing style, brand voice, and content archive. Generate scripts, captions, and ideas that sound like you.</p>
+            </div>
+            <div class="uc-card reveal">
+                <span class="uc-emoji">📈</span>
+                <h3>Sales & Support Teams</h3>
+                <p>An AI that knows your entire product catalogue, handles customer queries on WhatsApp or Slack, and never gives wrong info.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="faq" id="faq">
+    <div class="container">
+        <div style="text-align:center;">
+            <div class="sec-label reveal" style="justify-content:center;">FAQ</div>
+            <h2 class="sec-title reveal">Questions? <span class="grad">We have answers.</span></h2>
+            <p class="sec-sub reveal" style="margin:0 auto 3.5rem;">Everything you need to know before getting started.</p>
+        </div>
+        <div class="faq-grid">
+            <div class="faq-item reveal">
+                <div class="faq-q">Do I need any technical knowledge to use this? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">Not at all. We handle the entire setup — server provisioning, model installation, security configuration, and channel wiring. You just start chatting the day we hand it over.</div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-q">Is this really private — how can I verify it? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">The entire stack (Ollama, OpenClaw, your LLM) is open-source and runs on your dedicated VPS. You have full root access and can verify every process running on the server yourself.</div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-q">What's the difference between this and just using ChatGPT? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">ChatGPT processes your data on OpenAI's servers. Our solution runs entirely on your own private server — your data never leaves it. You also pay a flat monthly fee instead of per-message charges.</div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-q">Can I switch AI models later? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">Absolutely. Since we use Ollama, swapping or adding models is straightforward. We can assist with model upgrades as part of your support plan.</div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-q">Can the AI be trained on my own documents? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">Yes — the Enterprise plan includes RAG (Retrieval Augmented Generation) setup, which allows your AI to reference your internal documents, knowledge base, or product data when answering queries.</div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-q">What happens if my server goes down? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">We monitor uptime and proactively address issues. Our VPS infrastructure is on high-availability nodes with a 99.9% uptime SLA. In the rare event of downtime, we restore service typically within minutes.</div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-q">Do you offer a demo or trial? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">Yes! Book a free 15-minute demo call and we'll walk you through a live private AI setup. You can see exactly what you'll get before committing to any plan.</div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-q">What if I need more power as I scale? <span class="faq-arrow">▾</span></div>
+                <div class="faq-a">Upgrading your VPS specification is easy and we'll handle the migration. You can move between plans at any time — and qualify for the 5% discount when upgrading to a higher tier.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section class="cta-final" id="contact">
+    <div class="container">
+        <div class="cta-inner">
+            <div class="sec-label reveal" style="justify-content:center; margin-bottom:1.5rem;">Get Started</div>
+            <h2 class="reveal">Stop renting intelligence.<br><span class="grad">Start owning it.</span></h2>
+            <p class="reveal">Your competitors are already using AI. The question is — are they using yours, or someone else's? Set up your private AI today and take back control of your data and your intelligence.</p>
+            <div class="cta-btns reveal">
+                <a href="mailto:contact@aadicloud.com" class="btn-primary">🚀 Set Up My Private AI</a>
+                <a href="mailto:contact@aadicloud.com" class="btn-ghost-light">📅 Book a Free Demo Call</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <span class="logo">AADI CLOUD</span>
+                <p>Private VPS AI Hosting for individuals and businesses. Your data stays yours — always.</p>
+                <p style="margin-top:0.8rem; font-size:0.78rem; color:#2d3d52;">210, Anant Laxmi Chambers, B-Cabin,<br>Thane (W), Mumbai – 400601</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <ul>
+                    <li><a href="#problem">Why Private AI</a></li>
+                    <li><a href="#solution">Our Solution</a></li>
+                    <li><a href="#how">How It Works</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#security">Security</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="mailto:contact@aadicloud.com">contact@aadicloud.com</a></li>
+                    <li><a href="mailto:sales@aadicloud.com">sales@aadicloud.com</a></li>
+                    <li><a href="mailto:support@aadicloud.com">support@aadicloud.com</a></li>
+                    <li><a href="tel:+912249638603">+91 22 49638603</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-copy">© 2025 AADI CLOUD. All rights reserved.</div>
+            <div class="disclaimer">
+                <strong style="color:#3d4f66;">Disclaimer:</strong> AADI CLOUD is an independent service provider and is not affiliated with, endorsed by, or officially partnered with Ollama, OpenClaw, Meta (LLaMA), Mistral AI, Google (Gemini), Microsoft (Phi), or any other third-party AI platform or brand referenced on this site. All product names, logos, and trademarks are the property of their respective owners and are referenced solely for informational purposes to describe technology integrations.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const t = document.querySelector(a.getAttribute('href'));
+            if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
+    });
 
-        // Enhanced header scroll effect
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            const scrollY = window.scrollY;
-            if (scrollY > 100) {
-                header.style.background = 'rgba(255,255,255,0.98)';
-                header.style.boxShadow = '0 8px 32px rgba(0,0,0,0.12)';
-            } else {
-                header.style.background = 'rgba(255,255,255,0.95)';
-                header.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+    // Header scroll
+    window.addEventListener('scroll', () => {
+        document.querySelector('header').style.borderBottomColor =
+            window.scrollY > 60 ? 'rgba(45,126,247,0.25)' : 'rgba(45,126,247,0.15)';
+    });
+
+    // Reveal on scroll
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObs = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('visible'), i * 80);
+                revealObs.unobserve(e.target);
             }
         });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObs.observe(el));
 
-        // Enhanced Intersection Observer for animations
-        const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }, index * 100);
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.feature-card, .platform-card, .service-item').forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(40px)';
-            card.style.transition = `all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${index * 0.1}s`;
-            observer.observe(card);
+    // FAQ accordion
+    document.querySelectorAll('.faq-q').forEach(q => {
+        q.addEventListener('click', () => {
+            const item = q.parentElement;
+            const isOpen = item.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+            if (!isOpen) item.classList.add('open');
         });
-
-        // Parallax for particles
-        window.addEventListener('scroll', () => {
-            const particles = document.querySelectorAll('.particle');
-            const scrolled = window.pageYOffset;
-            particles.forEach((particle, index) => {
-                const speed = 0.2 + (index * 0.1);
-                particle.style.transform = `translateY(${scrolled * speed}px)`;
-            });
-        });
-
-        // Floating elements in hero
-        const createFloatingElement = () => {
-            const element = document.createElement('div');
-            element.style.cssText = `
-                position: absolute;
-                width: ${Math.random() * 4 + 2}px;
-                height: ${Math.random() * 4 + 2}px;
-                background: linear-gradient(45deg, rgba(59,130,246,${Math.random()*0.3+0.1}), rgba(139,92,246,${Math.random()*0.3+0.1}));
-                border-radius: 50%;
-                left: ${Math.random() * 60}%;
-                top: 100%;
-                pointer-events: none;
-                animation: float ${Math.random() * 10 + 15}s linear infinite;
-            `;
-            document.querySelector('.hero').appendChild(element);
-            setTimeout(() => element.remove(), 25000);
-        };
-        setInterval(createFloatingElement, 3000);
-    </script>
+    });
+</script>
 </body>
 </html>
